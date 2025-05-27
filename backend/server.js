@@ -4,12 +4,12 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 // Importazione dei modelli
-require('./models/User');
-require('./models/Vinyl');
-require('./models/Artist');
-require('./models/Comment');
-require('./models/Order');
-require('./models/Cart');
+require('./models/artist');
+require('./models/vinyl');
+require('./models/user');
+require('./models/comment');
+require('./models/order');
+require('./models/cart');
 
 const app = express();
 
@@ -20,10 +20,16 @@ app.use(express.json());
 // Importazione delle rotte
 const authRoutes = require('./routes/auth');
 const vinylRoutes = require('./routes/vinyl');
+const artistRoutes = require('./routes/artist');
+const commentRoutes = require('./routes/comment');
+const cartRoutes = require('./routes/cart');
 
 // Rotte
 app.use('/api/auth', authRoutes);
 app.use('/api/vinyls', vinylRoutes);
+app.use('/api/artists', artistRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/cart', cartRoutes);
 
 // Connessione MongoDB
 mongoose.connect(process.env.MONGODB_URI)

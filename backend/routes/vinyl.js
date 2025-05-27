@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const Vinyl = require('../models/Vinyl');
+const Vinyl = require('../models/vinyl');
 const DiscogsService = require('../services/discogs.service');
 
 // GET - Ricerca vinili (combina DB locale e Discogs)
 router.get('/search', async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query, page = 1 } = req.query;
     
     // Cerca nel DB locale
     const localResults = await Vinyl.find({
@@ -14,16 +14,23 @@ router.get('/search', async (req, res) => {
         { title: { $regex: query, $options: 'i' } },
         { artist: { $regex: query, $options: 'i' } }
       ]
-    });
+    }).populate('artist');
 
-    // Cerca su Discogs
-    const discogsResults = await DiscogsService.searchVinyl(query);
+    // Cerca su Discogs con paginazione
+    const discogsResults = await DiscogsService.searchVinyl(query, page);
 
     res.json({
-      local: localResults,
-      discogs: discogsResults.results
+      local: {
+        results: localResults,
+        total: localResults.length
+      },
+      discogs: {
+        results: discogsResults.results,
+        pagination: discogsResults.pagination
+      }
     });
   } catch (error) {
+    console.error('Search error:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -41,27 +48,37 @@ router.get('/filter/genre/:genre', async (req, res) => {
 // POST - Importa vinile da Discogs al DB locale
 router.post('/import/:discogsId', async (req, res) => {
   try {
-    const discogsVinyl = await DiscogsService.getVinylDetails(req.params.discogsId);
+    // Verifica se il vinile esiste già
+    let vinyl = await Vinyl.findOne({ discogsId: req.params.discogsId });
     
-    const vinyl = new Vinyl({
-      title: discogsVinyl.title,
-      artist: discogsVinyl.artists[0].name,
-      year: discogsVinyl.year,
-      genre: discogsVinyl.genres,
-      format: discogsVinyl.formats[0].name,
-      coverImage: discogsVinyl.images?.[0]?.uri,
-      tracklist: discogsVinyl.tracklist.map(track => ({
-        position: track.position,
-        title: track.title,
-        duration: track.duration
-      })),
-      price: req.body.price || 29.99, // Prezzo di default se non specificato
-      discogsId: discogsVinyl.id
-    });
+    if (!vinyl) {
+      const discogsVinyl = await DiscogsService.getVinylDetails(req.params.discogsId);
+      
+      vinyl = new Vinyl({
+        title: discogsVinyl.title,
+        artist: discogsVinyl.artists[0].name,
+        year: discogsVinyl.year,
+        genre: discogsVinyl.genres,
+        format: discogsVinyl.formats[0].name,
+        coverImage: discogsVinyl.images?.[0]?.uri,
+        tracklist: discogsVinyl.tracklist.map(track => ({
+          position: track.position,
+          title: track.title,
+          duration: track.duration
+        })),
+        price: req.body.price || 29.99,
+        discogsId: discogsVinyl.id
+      });
 
-    await vinyl.save();
-    res.status(201).json(vinyl);
+      await vinyl.save();
+    }
+
+    res.status(201).json({
+      message: vinyl.isNew ? 'Vinile importato con successo' : 'Vinile già presente',
+      vinyl
+    });
   } catch (error) {
+    console.error('Import error:', error);
     res.status(500).json({ message: error.message });
   }
 });
