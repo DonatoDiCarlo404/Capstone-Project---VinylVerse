@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Vinyl = require('../models/vinyl');
+const Comment = require('../models/comment');
 const DiscogsService = require('../services/discogs.service');
 
 // GET - Ricerca vinili (combina DB locale e Discogs)
@@ -116,6 +117,22 @@ router.get('/:id', async (req, res) => {
 
   } catch (error) {
     console.error('Errore dettaglio vinile:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET - Media voti per un vinile
+router.get('/:id/rating', async (req, res) => {
+  try {
+    const comments = await Comment.find({ vinyl: req.params.id });
+    const averageRating = comments.reduce((acc, comment) => acc + comment.rating, 0) / comments.length;
+    
+    res.json({ 
+      averageRating: averageRating || 0,
+      totalRatings: comments.length 
+    });
+  } catch (error) {
+    console.error('Rating error:', error);
     res.status(500).json({ message: error.message });
   }
 });

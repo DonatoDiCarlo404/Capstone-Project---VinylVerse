@@ -11,6 +11,9 @@ require('./models/comment');
 require('./models/order');
 require('./models/cart');
 
+// Error Middleware
+const errorHandler = require('./middleware/error');
+
 const app = express();
 
 // Middleware
@@ -23,6 +26,8 @@ const vinylRoutes = require('./routes/vinyl');
 const artistRoutes = require('./routes/artist');
 const commentRoutes = require('./routes/comment');
 const cartRoutes = require('./routes/cart');
+const orderRoutes = require('./routes/order');
+
 
 // Rotte
 app.use('/api/auth', authRoutes);
@@ -30,6 +35,10 @@ app.use('/api/vinyls', vinylRoutes);
 app.use('/api/artists', artistRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+
+// Middleware per la gestione degli errori
+app.use(errorHandler);
 
 // Connessione MongoDB
 mongoose.connect(process.env.MONGODB_URI)

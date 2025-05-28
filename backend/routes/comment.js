@@ -39,4 +39,56 @@ router.get('/vinyl/:vinylId', async (req, res) => {
     }
 });
 
+// PUT - Aggiorna/Modifica un commento
+router.put('/:commentId', auth, async (req, res) => {
+    try {
+        const comment = await Comment.findOne({
+            _id: req.params.commentId,
+            user: req.user.userId
+        });
+
+        if (!comment) {
+            return res.status(404).json({ 
+                message: 'Commento non trovato o non autorizzato alla modifica' 
+            });
+        }
+
+        // Aggiorna solo i campi forniti
+        if (req.body.text) comment.text = req.body.text;
+        if (req.body.rating) comment.rating = req.body.rating;
+
+        await comment.save();
+        await comment.populate('user', 'username');
+
+        res.json(comment);
+    } catch (error) {
+        console.error('Update comment error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// DELETE - Rimuovi un commento
+router.delete('/:commentId', auth, async (req, res) => {
+    try {
+        const comment = await Comment.findOne({
+            _id: req.params.commentId,
+            user: req.user.userId
+        });
+
+        if (!comment) {
+            return res.status(404).json({ 
+                message: 'Commento non trovato o non autorizzato alla cancellazione' 
+            });
+        }
+
+        await comment.deleteOne();
+
+        res.json({ message: 'Commento eliminato con successo' });
+
+    } catch (error) {
+        console.log('Delete comment error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;
