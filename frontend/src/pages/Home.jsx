@@ -54,9 +54,9 @@ const Home = () => {
           {vinyls.map((vinyl) => (
             <div key={vinyl.id} className="col-md-3">
               <div className="card h-100">
-                <img 
-                  src={vinyl.coverImage} 
-                  className="card-img-top" 
+                <img
+                  src={vinyl.coverImage}
+                  className="card-img-top"
                   alt={vinyl.title}
                   onError={(e) => {
                     e.target.onerror = null;
@@ -82,20 +82,21 @@ const Home = () => {
       </div>
 
       {/* Categories Section */}
-        <div className="row mt-5">
+      <div className="row mt-5">
         <h2 className="text-center mb-4">Generi più amati</h2>
-        {['Rock', 'Jazz', 'Rap', 'Electronic'].map((genre) => (
+        {['Rock', 'Jazz', 'Hip Hop', 'Electronic'].map((genre) => (
           <div key={genre} className="col-md-3 mb-4">
-            <Link 
-              to={`/browse?genre=${genre.toLowerCase()}`} 
+            <Link
+              to={`/browse?genre=${genre.toLowerCase()}`}
               className="text-decoration-none"
             >
               <div className="card bg-dark text-white hover-overlay h-100">
-                <div className="card-body d-flex align-items-center justify-content-center">
-                  <h3 className="card-title mb-0">{genre}</h3>
-                </div>
-                <div className="card-footer text-center bg-dark bg-opacity-75">
-                  <small className="text-white">Esplora</small>
+                <div className="card-body d-flex flex-column align-items-center justify-content-center">
+                  <h3 className="card-title mb-3">{genre}</h3>
+                  <small className="text-white">
+                    Esplora {genre.toLowerCase()}
+                    <i className="bi bi-arrow-right-circle ms-2"></i>
+                  </small>
                 </div>
               </div>
             </Link>

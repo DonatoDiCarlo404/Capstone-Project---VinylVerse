@@ -7,31 +7,38 @@ const DiscogsService = require('../services/discogs.service');
 // GET - Ricerca vinili (combina DB locale e Discogs)
 router.get('/search', async (req, res) => {
   try {
-    const { query, page = 1 } = req.query;
+    const { query, page = 1, per_page = 8, genre } = req.query;
     
-    // Cerca nel DB locale
-    const localResults = await Vinyl.find({
-      $or: [
-        { title: { $regex: query, $options: 'i' } },
-        { artist: { $regex: query, $options: 'i' } }
-      ]
-    }).populate('artist');
-
+    // Se c'è un genere specificato, usa quello come query di ricerca
+    const searchTerm = genre || query;
+    
     // Cerca su Discogs con paginazione
-    const discogsResults = await DiscogsService.searchVinyl(query, page);
+    const discogsResults = await DiscogsService.searchVinyl(searchTerm, parseInt(page), parseInt(per_page));
+
+    // Filtra i risultati di Discogs per genere se specificato
+    const filteredDiscogsResults = genre
+      ? discogsResults.results.filter(item =>
+          item.genre?.some(g => 
+            genre.toLowerCase() === 'hip hop' 
+              ? g.toLowerCase().includes('hip hop') || g.toLowerCase().includes('rap')
+              : g.toLowerCase() === genre.toLowerCase()
+          )
+        )
+      : discogsResults.results;
 
     res.json({
-      local: {
-        results: localResults,
-        total: localResults.length
-      },
       discogs: {
-        results: discogsResults.results,
-        pagination: discogsResults.pagination
+        results: filteredDiscogsResults,
+        pagination: {
+          page: parseInt(page),
+          pages: discogsResults.pagination.pages,
+          items: discogsResults.pagination.items,
+          per_page: parseInt(per_page)
+        }
       }
     });
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('Errore ricerca:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -201,6 +208,18 @@ router.get('/:id', async (req, res) => {
 
   } catch (error) {
     console.error('Errore dettaglio vinile:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET - Dettaglio vinile con tracklist
+router.get('/detail/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await DiscogsService.getVinylDetails(id);
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching vinyl details:', error);
     res.status(500).json({ message: error.message });
   }
 });
