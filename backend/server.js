@@ -4,12 +4,13 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 // Importazione dei modelli
-require('./models/artist');
-require('./models/vinyl');
-require('./models/user');
-require('./models/comment');
-require('./models/order');
-require('./models/cart');
+require('./models/User');
+require('./models/Vinyl');
+require('./models/Cart');
+require('./models/Comment');
+require('./models/Order');
+require('./models/Artist');
+
 
 // Error Middleware
 const errorHandler = require('./middleware/error');
@@ -19,6 +20,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
 
 // Importazione delle rotte
 const authRoutes = require('./routes/auth');
@@ -31,7 +33,7 @@ const orderRoutes = require('./routes/order');
 
 // Rotte
 app.use('/api/auth', authRoutes);
-app.use('/api/vinyls', vinylRoutes);
+app.use('/api/vinyl', vinylRoutes);
 app.use('/api/artists', artistRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/cart', cartRoutes);

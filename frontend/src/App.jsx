@@ -1,14 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Layout from './components/layout/LayoutComponent.jsx';
-import Home from './pages/Home.jsx';
-import Browse from './pages/Browse.jsx';
-import VinylDetail from './pages/VinylDetail.jsx';
-import Cart from './pages/Cart.jsx';
-import Login from './pages/Login.jsx';
-import Register from './pages/Register.jsx';
+import { AuthProvider } from './context/AuthContext';
+import Layout from './components/layout/LayoutComponent';
+import Home from './pages/Home';
+import Browse from './pages/Browse';
+import VinylDetail from './pages/VinylDetail';
+import Cart from './pages/Cart';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
   return (
+   <AuthProvider>
     <Router>
       <Layout>
         <Routes>
@@ -21,6 +23,7 @@ function App() {
         </Routes>
       </Layout>
     </Router>
+   </AuthProvider> 
   );
 }
 

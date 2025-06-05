@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const User = require('../models/User');
+const Comment = require('../models/Comment');
 const auth = require('../middleware/auth'); 
 
 // Registrazione
@@ -91,6 +92,34 @@ router.get('/profile', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+// GET - Recensioni utente
+router.get('/profile/reviews', auth, async (req, res) => {
+    try {
+        const userReviews = await Comment.find({ user: req.user.userId })
+            .populate('vinyl', 'title artist coverImage')
+            .populate('user', 'username')
+            .sort({ createdAt: -1 });
+
+        const formattedReviews = userReviews.map(review => ({
+            id: review._id,
+            vinylTitle: review.vinyl.title,
+            vinylArtist: review.vinyl.artist,
+            vinylCover: review.vinyl.coverImage,
+            rating: review.rating,
+            comment: review.text,
+            createdAt: review.createdAt
+        }));
+
+        res.json({
+            count: formattedReviews.length,
+            reviews: formattedReviews
+        });
+    } catch (error) {
+        console.error('Get user reviews error:', error);
+        res.status(500).json({ message: error.message });
+    }
 });
 
 module.exports = router;

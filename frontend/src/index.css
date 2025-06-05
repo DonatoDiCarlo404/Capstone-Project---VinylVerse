@@ -1,0 +1,17 @@
+.hover-overlay {
+  transition: transform 0.3s ease-in-out;
+}
+
+.hover-overlay:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.card-img-overlay {
+  background: rgba(0, 0, 0, 0.4);
+  transition: background 0.3s ease;
+}
+
+.card:hover .card-img-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Artist = require('../models/artist');
-const Vinyl = require('../models/vinyl');
+const Artist = require('../models/Artist');
+const Vinyl = require('../models/Vinyl');
 const DiscogsService = require('../services/discogs.service');
 
 // GET - Lista tutti gli artisti

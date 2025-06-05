@@ -65,8 +65,13 @@ const vinylSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  preview_urls: {
+    type: Map,
+    of: String,
+    default: {}
   }
-});
+}, { timestamps: true });
 
 // Metodo per calcolare il rating medio
 vinylSchema.methods.calculateAverageRating = function() {

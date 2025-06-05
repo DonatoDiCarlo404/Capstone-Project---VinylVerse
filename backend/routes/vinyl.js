@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Vinyl = require('../models/vinyl');
-const Comment = require('../models/comment');
+const Vinyl = require('../models/Vinyl');
+const Comment = require('../models/Comment');
 const DiscogsService = require('../services/discogs.service');
 
 // GET - Ricerca vinili (combina DB locale e Discogs)
@@ -84,6 +84,90 @@ router.post('/import/:discogsId', async (req, res) => {
   }
 });
 
+// GET - Media voti per un vinile
+router.get('/:id/rating', async (req, res) => {
+  try {
+    const comments = await Comment.find({ vinyl: req.params.id });
+    const averageRating = comments.reduce((acc, comment) => acc + comment.rating, 0) / comments.length;
+    
+    res.json({ 
+      averageRating: averageRating || 0,
+      totalRatings: comments.length 
+    });
+  } catch (error) {
+    console.error('Rating error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET - Pre ascolto audio per un vinile
+router.get('/:id/preview', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Prima cerca nel DB locale se l'ID è un ObjectId valido
+        if (id.match(/^[0-9a-fA-F]{24}$/)) {
+            const vinyl = await Vinyl.findById(id);
+            if (vinyl && vinyl.preview_urls) {
+                return res.json({
+                    source: 'local',
+                    preview_urls: vinyl.preview_urls
+                });
+            }
+        }
+
+        // Se non trovato localmente cerca su Discogs
+        const discogsVinyl = await DiscogsService.getVinylDetails(id);
+        return res.json({
+            source: 'discogs',
+            preview_urls: discogsVinyl.preview_urls
+        });
+
+    } catch (error) {
+        console.error('Preview error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// GET - Lista vinili casuali da Discogs
+router.get('/random', async (req, res) => {
+  try {
+    // Lista più ampia di generi per la ricerca casuale
+    const searchTerms = [
+      'rock', 'jazz', 'electronic', 'classical', 
+      'blues', 'funk', 'soul', 'metal',
+      'punk', 'reggae', 'indie', 'alternative'
+    ];
+    
+    // Seleziona 3 termini casuali per una ricerca più variegata
+    const randomTerms = searchTerms
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+    
+    // Esegui ricerca con termine casuale
+    const randomTerm = randomTerms[0];
+    const discogsResults = await DiscogsService.searchVinyl(randomTerm, 1);
+    
+    // Mappa e filtra i risultati
+    const vinyls = discogsResults.results
+      .filter(item => item.cover_image && item.title)
+      .map(item => ({
+        id: item.id,
+        title: item.title,
+        artist: item.artist || 'Unknown Artist',
+        year: item.year || 'N/A',
+        genre: Array.isArray(item.genre) ? item.genre : [],
+        coverImage: item.cover_image
+      }))
+      .slice(0, 4);
+
+    res.json(vinyls);
+  } catch (error) {
+    console.error('Error fetching random vinyls:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // GET - Dettaglio vinile
 router.get('/:id', async (req, res) => {
   try {
@@ -117,22 +201,6 @@ router.get('/:id', async (req, res) => {
 
   } catch (error) {
     console.error('Errore dettaglio vinile:', error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// GET - Media voti per un vinile
-router.get('/:id/rating', async (req, res) => {
-  try {
-    const comments = await Comment.find({ vinyl: req.params.id });
-    const averageRating = comments.reduce((acc, comment) => acc + comment.rating, 0) / comments.length;
-    
-    res.json({ 
-      averageRating: averageRating || 0,
-      totalRatings: comments.length 
-    });
-  } catch (error) {
-    console.error('Rating error:', error);
     res.status(500).json({ message: error.message });
   }
 });

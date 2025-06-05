@@ -29,18 +29,48 @@ class DiscogsService {
 
   async getVinylDetails(discogsId) {
     try {
-      const response = await fetch(`${this.baseURL}/releases/${discogsId}`, {
-        headers: this.headers
-      });
-      if (!response.ok) {
-        throw new Error(`Errore API Discogs: ${response.statusText}`);
-      }
-      return await response.json();
+        const response = await fetch(`${this.baseURL}/releases/${discogsId}`, {
+            headers: this.headers
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Errore API Discogs: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        
+        // Estrai i preview URLs dai video YouTube
+        const preview_urls = {};
+        
+        if (data.videos && data.videos.length > 0) {
+            // Filtra solo i video di YouTube
+            data.videos.forEach((video, index) => {
+                if (video.uri.includes('youtube.com')) {
+                    // Estrai l'ID del video YouTube
+                    const videoId = video.uri.split('v=')[1];
+                    if (videoId) {
+                        preview_urls[`track_${index + 1}`] = {
+                            url: video.uri,
+                            title: video.title,
+                            duration: video.duration
+                        };
+                    }
+                }
+            });
+        }
+
+        console.log('Preview URLs trovati:', preview_urls); // Debug log
+
+        return {
+            ...data,
+            preview_urls
+        };
     } catch (error) {
-      console.error('Errore dettagli Discogs:', error);
-      throw error;
+        console.error('Errore dettagli Discogs:', error);
+        throw error;
     }
   }
+
 
   async getArtistDetails(artistId) {
     try {
