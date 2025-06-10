@@ -9,7 +9,10 @@ const auth = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = {
+      id: decoded.id, // Mi aspetto che il token contenga un campo id
+      username: decoded.username
+    };
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token non valido' });

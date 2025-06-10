@@ -3,92 +3,89 @@ const router = express.Router();
 const Comment = require('../models/Comment');
 const auth = require('../middleware/auth');
 
-// POST - Aggiungi commento a un vinile
-router.post('/:vinylId', auth, async (req, res) => {
-    try {
-        const comment = new Comment({
-            user: req.user.userId,
-            vinyl: req.params.vinylId,
-            text: req.body.text,
-            rating: req.body.rating
-        });
-
-        await comment.save();
-
-        // Popola i dati utente nel commento per la risposta
-        await comment.populate('user', 'username');
-
-        res.status(201).json(comment);
-    } catch (error) {
-        console.error('Comment error:', error);
-        res.status(500).json({ message: error.message });
-    }
+// Rotta pubblica - Ottenere i commenti di un vinile
+router.get('/vinyl/:id', async (req, res) => {
+  try {
+    const comments = await Comment.find({ vinyl: req.params.id })
+      .populate('user', 'username')
+      .sort({ createdAt: -1 });
+    res.json(comments);
+  } catch (error) {
+    console.error('Errore nel recupero commenti:', error);
+    res.status(500).json({ message: 'Errore nel recupero dei commenti' });
+  }
 });
 
-// GET - Ottieni commenti per un vinile specifico
-router.get('/vinyl/:vinylId', async (req, res) => {
-    try {
-        const comments = await Comment.find({ vinyl: req.params.vinylId })
-            .populate('user', 'username')
-            .sort({ createdAt: -1 });
+// Rotte protette - Richiedono autenticazione
+router.post('/', auth, async (req, res) => {
+  try {
+    const { vinylId, text, rating } = req.body;
 
-        res.json(comments);
-    } catch (error) {
-        console.error('Get comments error:', error);
-        res.status(500).json({ message: error.message });
-    }
+    const comment = new Comment({
+      user: req.user.id,
+      vinyl: vinylId.toString(), 
+      text,
+      rating: rating || 5
+    });
+
+    const savedComment = await comment.save();
+    const populatedComment = await Comment.findById(savedComment._id)
+      .populate('user', 'username');
+
+    res.status(201).json(populatedComment);
+  } catch (error) {
+    console.error('Errore completo:', error);
+    res.status(500).json({ 
+      message: 'Errore aggiunta commento',
+      error: error.message
+    });
+  }
 });
 
-// PUT - Aggiorna/Modifica un commento
-router.put('/:commentId', auth, async (req, res) => {
-    try {
-        const comment = await Comment.findOne({
-            _id: req.params.commentId,
-            user: req.user.userId
-        });
-
-        if (!comment) {
-            return res.status(404).json({ 
-                message: 'Commento non trovato o non autorizzato alla modifica' 
-            });
-        }
-
-        // Aggiorna solo i campi forniti
-        if (req.body.text) comment.text = req.body.text;
-        if (req.body.rating) comment.rating = req.body.rating;
-
-        await comment.save();
-        await comment.populate('user', 'username');
-
-        res.json(comment);
-    } catch (error) {
-        console.error('Update comment error:', error);
-        res.status(500).json({ message: error.message });
+// Modifica commento - solo proprietario
+router.put('/:id', auth, async (req, res) => {
+  try {
+    const comment = await Comment.findOne({ 
+      _id: req.params.id,
+      user: req.user.id 
+    });
+    
+    if (!comment) {
+      return res.status(404).json({ message: 'Commento non trovato o non autorizzato' });
     }
+
+    comment.text = req.body.text; // <-- Cambiato da content a text
+    if (req.body.rating) comment.rating = req.body.rating;
+    
+    await comment.save();
+
+    // Popola l'utente prima di inviare la risposta
+    const updatedComment = await Comment.findById(comment._id)
+      .populate('user', 'username');
+    
+    res.json(updatedComment);
+  } catch (error) {
+    console.error('Errore modifica commento:', error);
+    res.status(500).json({ message: 'Errore modifica commento' });
+  }
 });
 
-// DELETE - Rimuovi un commento
-router.delete('/:commentId', auth, async (req, res) => {
-    try {
-        const comment = await Comment.findOne({
-            _id: req.params.commentId,
-            user: req.user.userId
-        });
-
-        if (!comment) {
-            return res.status(404).json({ 
-                message: 'Commento non trovato o non autorizzato alla cancellazione' 
-            });
-        }
-
-        await comment.deleteOne();
-
-        res.json({ message: 'Commento eliminato con successo' });
-
-    } catch (error) {
-        console.log('Delete comment error:', error);
-        res.status(500).json({ message: error.message });
+// Elimina commento - solo proprietario
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const comment = await Comment.findOneAndDelete({ 
+      _id: req.params.id,
+      user: req.user.id 
+    });
+    
+    if (!comment) {
+      return res.status(404).json({ message: 'Commento non trovato o non autorizzato' });
     }
+
+    res.json({ message: 'Commento eliminato con successo' });
+  } catch (error) {
+    res.status(500).json({ message: 'Errore eliminazione commento' });
+  }
 });
 
 module.exports = router;

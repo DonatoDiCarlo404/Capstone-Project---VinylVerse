@@ -15,19 +15,25 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       authAPI.getProfile()
-        .then(user => setUser(user))
+        .then(user => {
+          setUser(user);
+          setIsAuthenticated(true);
+        })
         .catch(err => {
           console.error('Errore profilo:', err);
           localStorage.removeItem('token');
           setError(err.message);
+          setIsAuthenticated(false);
         })
         .finally(() => setLoading(false));
     } else {
+      setIsAuthenticated(false);
       setLoading(false);
     }
   }, []);
@@ -37,9 +43,11 @@ export const AuthProvider = ({ children }) => {
       const data = await authAPI.login(credentials);
       localStorage.setItem('token', data.token);
       setUser(data.user);
+      setIsAuthenticated(true);
       setError(null);
     } catch (err) {
       setError(err.message);
+      setIsAuthenticated(false);
       throw err;
     }
   };
@@ -47,6 +55,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    setIsAuthenticated(false);
   };
 
   if (loading) {
@@ -59,7 +68,8 @@ export const AuthProvider = ({ children }) => {
       login, 
       logout, 
       loading,
-      error 
+      error,
+      isAuthenticated 
     }}>
       {children}
     </AuthContext.Provider>

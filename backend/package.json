@@ -10,5 +10,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "googleapis": "^150.0.1",
+    "node-cache": "^5.1.2"
+  }
 }

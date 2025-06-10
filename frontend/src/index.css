@@ -1,3 +1,4 @@
+/* Card Hover Effects */
 .hover-overlay {
   transition: transform 0.3s ease-in-out;
 }
@@ -16,11 +17,7 @@
   background: rgba(0, 0, 0, 0.6);
 }
 
-.btn-outline-danger:hover {
-  background-color: #dc3545;
-  color: white;
-}
-
+/* Table & Button Styles */
 .table td {
   vertical-align: middle;
 }
@@ -33,33 +30,156 @@
   font-size: 1.2rem;
 }
 
-.btn-outline-danger .bi,
-.btn-outline-secondary .bi {
-  line-height: 1;
-}
-
+/* Modal Styles */
 .modal-content {
   background-color: #000;
+  border-radius: 8px;
 }
 
 .modal-header {
   border-bottom: none;
   padding: 1rem;
-}
-
-.modal-header .btn-close {
-  color: white;
-  opacity: 0.8;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .modal-title {
   color: white;
 }
 
-.btn-outline-primary:hover .bi {
-  transform: scale(1.1);
+/* Audio Preview Styles */
+.audio-preview-container {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
 }
 
-.btn-outline-primary .bi {
-  transition: transform 0.2s ease;
+.audio-preview-frame {
+  background: transparent;
+}
+
+/* Comments Section Styles */
+.comments-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.comments-list .card {
+  transition: box-shadow 0.2s ease;
+}
+
+.comments-list .card:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-sm .bi {
+  font-size: 0.875rem;
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.login-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.login-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.error-message {
+  color: #dc3545;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: #f8d7da;
+}
+
+/* Logout Button Styles */
+.btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-outline-danger .bi {
+  margin-right: 0.5rem;
+}
+
+/* Navbar user styles */
+.navbar .nav-link .bi {
+  font-size: 1.1rem;
+  vertical-align: -2px;
+}
+
+.navbar .nav-item {
+  display: flex;
+  align-items: center;
+}
+
+.nav-link {
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #fff !important;
+}
+
+/* Comment styles */
+.comments-list .card {
+  transition: all 0.2s ease;
+}
+
+.comments-list .card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.card-body .text-muted i {
+  font-size: 0.875rem;
+  margin-right: 0.25rem;
+}
+
+.card-body .btn-group {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.card-body:hover .btn-group {
+  opacity: 1;
+}
+
+.comment-rating {
+  color: #ffc107;
+  font-weight: bold;
 }

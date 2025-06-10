@@ -7,8 +7,7 @@ const commentSchema = new mongoose.Schema({
     required: true
   },
   vinyl: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vinyl',
+    type: String,  // Changed from ObjectId to String for Discogs IDs
     required: true
   },
   text: {
@@ -28,14 +27,10 @@ const commentSchema = new mongoose.Schema({
   }
 });
 
-// Middleware per aggiornare il rating medio del vinile dopo un nuovo commento
-commentSchema.post('save', async function() {
-  const Vinyl = mongoose.model('Vinyl');
-  const vinyl = await Vinyl.findById(this.vinyl);
-  if (vinyl) {
-    await vinyl.calculateAverageRating();
-    await vinyl.save();
-  }
+// Remove any pre-save hooks that might be trying to validate the vinyl ID
+commentSchema.pre('save', function(next) {
+  // Add any other validations here if needed
+  next();
 });
 
 module.exports = mongoose.model('Comment', commentSchema);
