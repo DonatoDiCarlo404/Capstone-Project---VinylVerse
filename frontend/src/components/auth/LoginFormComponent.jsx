@@ -39,11 +39,17 @@ const LoginFormComponent = ({ onSuccess }) => {
       // Debug
       console.log('Login effettuato, token salvato:', data.token);
 
-      // Callback di successo se fornita
-      if (onSuccess) onSuccess();
-
-      // Reindirizza alla home
-      navigate('/');
+      // Controlla se esiste un returnTo nel localStorage
+      const returnTo = localStorage.getItem('returnTo');
+      if (returnTo) {
+        // Se esiste, pulisci il localStorage e naviga alla pagina salvata
+        localStorage.removeItem('returnTo');
+        navigate(returnTo);
+      } else {
+        // Altrimenti, comportamento di default
+        if (onSuccess) onSuccess();
+        navigate('/');
+      }
     } catch (error) {
       console.error('Errore login:', error);
       setError(error.message || 'Errore durante il login');

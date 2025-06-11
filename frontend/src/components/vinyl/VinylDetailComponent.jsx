@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Modal } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import SpinnerComponent from '../layout/SpinnerComponent';
 
 const VinylDetailComponent = () => {
@@ -19,6 +20,9 @@ const VinylDetailComponent = () => {
   const [editRating, setEditRating] = useState(0);
   const [editText, setEditText] = useState('');
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [cartFeedback, setCartFeedback] = useState({ visible: false, message: '' });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -173,6 +177,57 @@ const VinylDetailComponent = () => {
     }
   };
 
+  // Funzione per calcolare il prezzo base
+  const calculateBasePrice = () => {
+    const currentYear = new Date().getFullYear();
+    const vinylAge = currentYear - vinyl.year;
+
+    // Prezzo base per tutti i vinili
+    let basePrice = 19.99;
+
+    // Aumenta il prezzo per vinili più vecchi
+    if (vinylAge > 20) basePrice += 10;
+    if (vinylAge > 40) basePrice += 15;
+
+    // Bonus per vinili rari
+    if (vinyl.format?.toLowerCase().includes('limited')) basePrice += 20;
+    if (vinyl.format?.toLowerCase().includes('colored')) basePrice += 10;
+
+    return Number(basePrice.toFixed(2));
+  };
+
+  const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      // Salva l'URL corrente prima del redirect
+      localStorage.setItem('returnTo', `/vinyl/${id}`);
+      // Reindirizza al login
+      navigate('/login');
+      return;
+    }
+
+    const vinylToAdd = {
+      id: vinyl.id,
+      title: vinyl.title,
+      artist: vinyl.artists?.[0]?.name || 'Unknown Artist',
+      cover_image: vinyl.images?.[0]?.uri || 'https://via.placeholder.com/150',
+      price: calculateBasePrice(),
+    };
+
+    addToCart(vinylToAdd);
+    setAddedToCart(true);
+
+    // Mostra il feedback
+    setCartFeedback({
+      visible: true,
+      message: '🎵 Aggiunto al carrello!'
+    });
+
+    // Nascondi il feedback dopo 2 secondi
+    setTimeout(() => {
+      setCartFeedback({ visible: false, message: '' });
+      setAddedToCart(false);
+    }, 2000);
+  };
 
 
   if (loading) {
@@ -207,21 +262,28 @@ const VinylDetailComponent = () => {
     <>
       <div className="container py-5">
         <button
-        className="btn btn-secondary mb-4"
-        onClick={() => {
-          // Store search state before navigating
-          if (vinyl) {
-            localStorage.setItem('lastSearchResults', JSON.stringify({
-              type: 'album',
-              query: vinyl.title
-            }));
-          }
-          navigate('/search');
-        }}
-      >
-        <i className="bi bi-arrow-left me-2"></i>
-        Torna alla Ricerca
-      </button>
+          className="btn btn-secondary mb-4"
+          onClick={() => {
+            // Se veniamo dalla pagina artista, usa navigate(-1)
+            const fromArtist = document.referrer.includes('/artist/');
+            if (fromArtist) {
+              navigate(-1);
+            } else {
+              // Altrimenti mantieni il comportamento esistente per la ricerca
+              if (vinyl) {
+                localStorage.setItem('lastSearchResults', JSON.stringify({
+                  type: 'album',
+                  query: vinyl.title
+                }));
+              }
+              navigate('/search');
+            }
+          }}
+        >
+          <i className="bi bi-arrow-left me-2"></i>
+          Indietro
+        </button>
+
         <div className="row">
           <div className="col-md-4">
             <img
@@ -233,6 +295,45 @@ const VinylDetailComponent = () => {
                 e.target.src = '/vinyl-placeholder.jpg';
               }}
             />
+            <div className="position-relative">
+              <button
+                className={`btn ${addedToCart ? 'btn-success' : 'btn-primary'} mt-3`}
+                onClick={handleAddToCart}
+                disabled={addedToCart}
+              >
+                {!isAuthenticated ? (
+                  <>
+                    <i className="bi bi-box-arrow-in-right me-2"></i>
+                    Accedi per Acquistare
+                  </>
+                ) : (
+                  addedToCart ? '✓ Aggiunto!' : 'Aggiungi al Carrello'
+                )}
+              </button>
+
+              {cartFeedback.visible && (
+                <div
+                  className="position-absolute top-0 start-100 ms-3 mt-3 p-2 bg-success text-white rounded shadow-sm"
+                  style={{
+                    animation: 'fadeInOut 2s ease-in-out',
+                    zIndex: 1000
+                  }}
+                >
+                  {cartFeedback.message}
+                </div>
+              )}
+              <div className="price-section mb-3">
+                <h3 className="text-dark mt-3">
+                  €{calculateBasePrice()}
+                </h3>
+                {vinyl.format?.toLowerCase().includes('limited') && (
+                  <span className="badge bg-warning text-dark me-2">Edizione Limitata</span>
+                )}
+                {vinyl.year && (vinyl.year < 1980) && (
+                  <span className="badge bg-info">Vintage</span>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="col-md-8">

@@ -71,26 +71,26 @@ const ArtistProfileComponent = () => {
   return (
     <div className="container py-5">
       <button
-      className="btn btn-secondary mb-4"
-      onClick={() => {
-        // Store complete artist data including image
-        if (artist) {
-          localStorage.setItem('lastSearchResults', JSON.stringify({
-            artist: {
-              ...artist,
-              thumb: artist.images?.[0]?.uri || null, // Add thumb property
-              id: artist.id,
-              name: artist.name
-            },
-            query: artist.name
-          }));
-        }
-        navigate('/search');
-      }}
-    >
-      <i className="bi bi-arrow-left me-2"></i>
-      Torna alla Ricerca
-    </button>
+        className="btn btn-secondary mb-4"
+        onClick={() => {
+          // Store complete artist data including image
+          if (artist) {
+            localStorage.setItem('lastSearchResults', JSON.stringify({
+              artist: {
+                ...artist,
+                thumb: artist.images?.[0]?.uri || null, // Add thumb property
+                id: artist.id,
+                name: artist.name
+              },
+              query: artist.name
+            }));
+          }
+          navigate('/search');
+        }}
+      >
+        <i className="bi bi-arrow-left me-2"></i>
+        Indietro
+      </button>
       <div className="row">
         <div className="col-md-4">
           <img

@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import LogoutButton from '../auth/LogoutButtonComponent';
 
 const Navbar = () => {
   const { isAuthenticated, user } = useAuth();
+  const { cartItems } = useCart();
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -19,11 +22,18 @@ const Navbar = () => {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
-            {isAuthenticated && (
-              <li className="nav-item">
-                <Link className="nav-link" to="/cart">Cart</Link>
-              </li>
-            )}
+            <li className="nav-item">
+              <Link className="nav-link position-relative" to="/cart">
+                Carrello
+                <i className="bi bi-cart3 ms-2"></i>
+                {itemCount > 0 && (
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {itemCount}
+                    <span className="visually-hidden">prodotti nel carrello</span>
+                  </span>
+                )}
+              </Link>
+            </li>
           </ul>
           
           <ul className="navbar-nav ms-auto">

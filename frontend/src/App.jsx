@@ -11,26 +11,29 @@ import Register from './pages/Register';
 import VinylDetailComponent from './components/vinyl/VinylDetailComponent';
 import SearchComponent from './components/search/SearchComponent';
 import ArtistProfileComponent from './components/layout/ArtistProfileComponent';
+import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
     <LoadingProvider>
       <AuthProvider>
-        <Router>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/search" element={<SearchComponent />} />
-              <Route path="/browse" element={<Browse />} />
-              <Route path="/browse/:genre" element={<Browse />} />
-              <Route path="/artist/:id" element={<ArtistProfileComponent />} />
-              <Route path="/vinyl/:id" element={<VinylDetailComponent />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Routes>
-          </Layout>
-        </Router>
+        <CartProvider>
+          <Router>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/search" element={<SearchComponent />} />
+                <Route path="/browse" element={<Browse />} />
+                <Route path="/browse/:genre" element={<Browse />} />
+                <Route path="/artist/:id" element={<ArtistProfileComponent />} />
+                <Route path="/vinyl/:id" element={<VinylDetailComponent />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Routes>
+            </Layout>
+          </Router>
+        </CartProvider>
       </AuthProvider>
     </LoadingProvider>
   );

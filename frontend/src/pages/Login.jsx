@@ -16,7 +16,6 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      <h1>Accedi</h1>
       <LoginFormComponent onSuccess={handleLoginSuccess} />
     </div>
   );
