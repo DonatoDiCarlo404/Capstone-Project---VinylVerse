@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Modal } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
 import SpinnerComponent from '../layout/SpinnerComponent';
@@ -18,17 +18,31 @@ const VinylDetailComponent = () => {
   const [newRating, setNewRating] = useState(0);
   const [editRating, setEditRating] = useState(0);
   const [editText, setEditText] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch vinyl details
-        const vinylResponse = await fetch(`http://localhost:3001/api/vinyl/${id}`);
+        const searchParams = new URLSearchParams(window.location.search);
+        const type = searchParams.get('type') || 'release';
+
+        const vinylResponse = await fetch(
+          `http://localhost:3001/api/vinyl/${id}?type=${type}`,
+          {
+            headers: {
+              'Accept': 'application/json'
+            }
+          }
+        );
+
         if (!vinylResponse.ok) throw new Error('Vinile non trovato');
         const vinylData = await vinylResponse.json();
 
-        // Transform tracklist data
+        // Debug log
+        console.log('Fetched vinyl data:', vinylData);
+
+        // Single transformedData declaration
         const transformedData = {
           ...vinylData,
           tracklist: vinylData.tracklist.map(track => ({
@@ -38,16 +52,22 @@ const VinylDetailComponent = () => {
           }))
         };
 
-        // Fetch comments
-        const commentsResponse = await fetch(`http://localhost:3001/api/comments/vinyl/${id}`);
-        if (!commentsResponse.ok) throw new Error('Errore nel caricamento dei commenti');
-        const commentsData = await commentsResponse.json();
-
-        // Add artificial delay for spinner (2 seconds)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
         setVinyl(transformedData);
-        setComments(commentsData);
+
+        try {
+          const commentsResponse = await fetch(`http://localhost:3001/api/comments/${id}`);
+          if (commentsResponse.ok) {
+            const commentsData = await commentsResponse.json();
+            setComments(commentsData);
+          } else {
+            // Se la risposta non è ok (404 incluso), inizializza con array vuoto
+            setComments([]);
+          }
+        } catch {
+          // In caso di altri errori, inizializza con array vuoto
+          setComments([]);
+        }
+
       } catch (err) {
         console.error('Errore:', err);
         setError(err.message);
@@ -153,6 +173,8 @@ const VinylDetailComponent = () => {
     }
   };
 
+
+
   if (loading) {
     return (
       <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
@@ -184,6 +206,22 @@ const VinylDetailComponent = () => {
   return (
     <>
       <div className="container py-5">
+        <button
+        className="btn btn-secondary mb-4"
+        onClick={() => {
+          // Store search state before navigating
+          if (vinyl) {
+            localStorage.setItem('lastSearchResults', JSON.stringify({
+              type: 'album',
+              query: vinyl.title
+            }));
+          }
+          navigate('/search');
+        }}
+      >
+        <i className="bi bi-arrow-left me-2"></i>
+        Torna alla Ricerca
+      </button>
         <div className="row">
           <div className="col-md-4">
             <img

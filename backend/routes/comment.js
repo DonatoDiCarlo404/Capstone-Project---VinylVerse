@@ -16,6 +16,21 @@ router.get('/vinyl/:id', async (req, res) => {
   }
 });
 
+// GET - Recupera commenti per un vinile
+router.get('/:vinylId', async (req, res) => {
+    try {
+        const comments = await Comment.find({ vinyl: req.params.vinylId })
+            .populate('user', 'username')
+            .sort({ createdAt: -1 });
+        
+        // Invia sempre un array (vuoto se non ci sono commenti)
+        res.json(comments);
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        res.status(500).json({ message: 'Errore nel recupero dei commenti' });
+    }
+});
+
 // Rotte protette - Richiedono autenticazione
 router.post('/', auth, async (req, res) => {
   try {

@@ -257,73 +257,39 @@ router.get('/genres', async (req, res) => {
 
 // GET - Dettaglio vinile
 router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    console.log('Richiesta dettagli vinile:', id);
+    try {
+        const { id } = req.params;
+        const { type } = req.query;
 
-    const discogsResponse = await fetch(
-      `https://api.discogs.com/releases/${id}`,
-      {
-        headers: {
-          'User-Agent': 'VinylVerse/1.0',
-          'Authorization': `Discogs token=${process.env.DISCOGS_TOKEN}`
+        // Determine the correct API endpoint
+        let discogsUrl;
+        if (type === 'master') {
+            discogsUrl = `https://api.discogs.com/masters/${id}`;
+        } else {
+            discogsUrl = `https://api.discogs.com/releases/${id}`;
         }
-      }
-    );
 
-    if (!discogsResponse.ok) {
-      throw new Error('Vinile non trovato su Discogs');
+        console.log('Fetching from Discogs URL:', discogsUrl); // Debug log
+
+        const response = await fetch(discogsUrl, {
+            headers: {
+                'Authorization': `Discogs token=${process.env.DISCOGS_TOKEN}`,
+                'User-Agent': 'VinylVerse/1.0'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Discogs API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Discogs API response:', data); // Debug log
+
+        res.json(data);
+    } catch (error) {
+        console.error('Error in vinyl route:', error);
+        res.status(500).json({ error: error.message });
     }
-
-    const vinylData = await discogsResponse.json();
-
-    // Aggiungi preview URLs da YouTube
-    const tracksWithPreviews = await Promise.all(
-      vinylData.tracklist.map(async track => {
-        try {
-          const cacheKey = `${vinylData.artists[0].name}-${track.title}`;
-          let videoId = previewCache.get(cacheKey);
-
-          if (!videoId) {
-            const ytResponse = await youtube.search.list({
-              part: ['snippet'],
-              q: `${vinylData.artists[0].name} ${track.title} audio`,
-              maxResults: 1,
-              type: ['video']
-            });
-
-            videoId = ytResponse.data.items?.[0]?.id?.videoId;
-            previewCache.set(cacheKey, videoId);
-          }
-
-          return {
-            ...track,
-            duration: track.duration || '-',
-            preview_url: videoId ?
-              `https://www.youtube.com/embed/${videoId}?autoplay=1&start=0&end=30` :
-              null
-          };
-        } catch (err) {
-          console.error(`Errore preview per ${track.title}:`, err.message);
-          return {
-            ...track,
-            duration: track.duration || '-',
-            preview_url: null
-          };
-        }
-      })
-    );
-
-    const transformedData = {
-      ...vinylData,
-      tracklist: tracksWithPreviews
-    };
-
-    res.json(transformedData);
-  } catch (error) {
-    console.error('Errore recupero vinile:', error);
-    res.status(404).json({ message: 'Vinile non trovato' });
-  }
 });
 
 
@@ -343,6 +309,61 @@ router.get('/:id/rating', async (req, res) => {
   }
 });
 
+// GET - Dettagli artista
+router.get('/artist/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
 
+        // Fetch artista
+        const artistResponse = await fetch(
+            `https://api.discogs.com/artists/${id}`,
+            {
+                headers: {
+                    'Authorization': `Discogs token=${process.env.DISCOGS_TOKEN}`,
+                    'User-Agent': 'VinylVerse/1.0'
+                }
+            }
+        );
+
+        if (!artistResponse.ok) throw new Error('Artista non trovato');
+        const artistData = await artistResponse.json();
+
+        // Fetch MAIN RELEASES invece di releases
+        const mainReleasesResponse = await fetch(
+            `https://api.discogs.com/artists/${id}/releases?sort=year&sort_order=desc&per_page=100&role=main`,
+            {
+                headers: {
+                    'Authorization': `Discogs token=${process.env.DISCOGS_TOKEN}`,
+                    'User-Agent': 'VinylVerse/1.0'
+                }
+            }
+        );
+
+        const mainReleasesData = await mainReleasesResponse.json();
+
+        // Filtra solo gli album principali
+        const mainAlbums = mainReleasesData.releases.filter(release => {
+            const isMainAlbum = 
+                release.role === "Main" &&
+                !release.title.toLowerCase().includes('live') &&
+                !release.title.toLowerCase().includes('tour') &&
+                !release.title.toLowerCase().includes('remix') &&
+                !release.title.match(/\d{2}[-/.]\d{2}[-/.]\d{4}/);
+
+            return isMainAlbum;
+        });
+
+        res.json({
+            artist: {
+                ...artistData,
+                releases: mainAlbums
+            }
+        });
+
+    } catch (error) {
+        console.error('Errore nel recupero dettagli artista:', error);
+        res.status(500).json({ error: 'Errore nel recupero dettagli artista' });
+    }
+});
 
 module.exports = router;
