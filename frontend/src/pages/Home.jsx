@@ -13,10 +13,10 @@ const Home = () => {
       try {
         setLoading(true);
         const response = await fetch('http://localhost:3001/api/vinyl/home-random');
-        
+
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        
+
         setRandomVinyls(data.discogs.results);
       } catch (err) {
         console.error('Error fetching random vinyls:', err);
@@ -70,7 +70,7 @@ const Home = () => {
               <div className="row g-4">
                 {group.map((vinyl) => (
                   <div key={vinyl.id} className="col-md-3">
-                    <div className="card h-100">
+                    <div className="card h-100 d-flex flex-column">
                       <img
                         src={vinyl.cover_image}
                         className="card-img-top"
@@ -81,7 +81,7 @@ const Home = () => {
                           e.target.src = 'https://placehold.co/300x300?text=No+Image';
                         }}
                       />
-                      <div className="card-body">
+                      <div className="card-body d-flex flex-column">
                         <h5 className="card-title">{vinyl.title}</h5>
                         <p className="card-text">{vinyl.artist}</p>
                         <p className="card-text">
@@ -89,12 +89,14 @@ const Home = () => {
                             {vinyl.year} - {vinyl.genre?.join(', ')}
                           </small>
                         </p>
-                        <Link 
-                          to={`/vinyl/${vinyl.id}`}
-                          className="btn btn-primary"
-                        >
-                          Vedi Album
-                        </Link>
+                        <div className="mt-auto text-center">
+                          <Link
+                            to={`/vinyl/${vinyl.id}`}
+                            className="btn btn-primary"
+                          >
+                            Vedi Album
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>

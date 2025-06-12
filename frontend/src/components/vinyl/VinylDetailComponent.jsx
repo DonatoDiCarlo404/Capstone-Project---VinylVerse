@@ -84,14 +84,18 @@ const VinylDetailComponent = () => {
   }, [id]);
 
   const handlePreview = (track) => {
-        if (!track.preview_url) {
-            setError('Anteprima non disponibile per questa traccia');
-            return;
-        }
+    if (!track.preview_url) return;
 
-        setCurrentPreview(track);
-        setShowPlayer(true);
-    };
+    const videoId = track.preview_url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
+
+    if (videoId) {
+      // Aggiunto enablejsapi=1 e origin per miglior controllo del player
+      track.preview_url = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&enablejsapi=1&origin=${window.location.origin}&playsinline=1`;
+    }
+
+    setCurrentPreview(track);
+    setShowPlayer(true);
+  };
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -266,13 +270,13 @@ const VinylDetailComponent = () => {
   return (
     <>
       <div className="container py-5">
-              <button 
-        className="btn btn-secondary mb-4"
-        onClick={() => navigate(-1)}
-      >
-        <i className="bi bi-arrow-left me-2"></i>
-        Indietro
-      </button>
+        <button
+          className="btn btn-secondary mb-4"
+          onClick={() => navigate(-1)}
+        >
+          <i className="bi bi-arrow-left me-2"></i>
+          Indietro
+        </button>
 
 
         <div className="row">
@@ -360,10 +364,10 @@ const VinylDetailComponent = () => {
                         <td>
                           {/* Mostra sempre il bottone, ma disabilitato se non c'è preview */}
                           <button
-                            className="btn btn-outline-primary btn-sm"
+                            className={`btn ${track.preview_url ? 'btn-outline-success' : 'btn-outline-danger'} btn-sm`}
                             onClick={() => track.preview_url && handlePreview(track)}
-                            title={track.preview_url ? "Ascolta Anteprima" : "Anteprima non disponibile"}
                             disabled={!track.preview_url}
+                            title={track.preview_url ? "Ascolta Anteprima" : "Anteprima non disponibile"}
                           >
                             <i className={`bi bi-${track.preview_url ? 'play-circle' : 'dash-circle'}`}></i>
                           </button>
@@ -514,10 +518,10 @@ const VinylDetailComponent = () => {
         show={showPlayer}
         onHide={() => setShowPlayer(false)}
         centered
-        size="md"
+        size="sm"
       >
         <Modal.Header closeButton>
-          <Modal.Title>
+          <Modal.Title className="h6">
             {currentPreview?.title || 'Anteprima (30s)'}
           </Modal.Title>
         </Modal.Header>
@@ -526,16 +530,19 @@ const VinylDetailComponent = () => {
             <div className="audio-preview-container">
               <iframe
                 src={currentPreview.preview_url}
-                title={currentPreview.title}
-                allow="autoplay"
+                title={`Anteprima di ${currentPreview.title}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                loading="lazy"
+                tabIndex="0"
                 className="audio-preview-frame"
                 style={{
                   width: '100%',
-                  height: '80px',
+                  height: '200px',
                   border: 'none',
                   borderRadius: '4px'
                 }}
-              ></iframe>
+              />
             </div>
           )}
         </Modal.Body>

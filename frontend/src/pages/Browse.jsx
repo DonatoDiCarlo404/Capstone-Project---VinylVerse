@@ -75,11 +75,7 @@ const Browse = () => {
   };
 
   if (loading) {
-    return (
-      <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
-        <SpinnerComponent />
-      </div>
-    );
+    return <SpinnerComponent />;
   }
 
   if (error) return <div className="container py-5 text-danger">{error}</div>;
@@ -123,7 +119,7 @@ const Browse = () => {
                   e.target.src = 'https://placehold.co/300x300?text=No+Image';
                 }}
               />
-              <div className="card-body">
+              <div className="card-body d-flex flex-column">
                 <h5 className="card-title">{vinyl.title}</h5>
                 <p className="card-text">{vinyl.artist}</p>
                 <div className="d-flex justify-content-between align-items-center mb-2">
@@ -141,12 +137,14 @@ const Browse = () => {
                       : (vinyl.genre || 'N/A')}
                   </small>
                 </div>
+                <div className="mt-auto text-center">
                 <Link
                   to={`/vinyl/${vinyl.id}`}
                   className="btn btn-primary w-100"
                 >
                   Vedi Album
                 </Link>
+                </div>
               </div>
             </div>
           </div>

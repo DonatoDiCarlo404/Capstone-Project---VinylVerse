@@ -12,7 +12,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "googleapis": "^150.0.1",
     "node-cache": "^5.1.2"
   }
 }

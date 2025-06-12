@@ -90,10 +90,10 @@ const SearchComponent = () => {
 
     const handleSearch = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
         setError(null);
 
         try {
+            setIsLoading(true);
             if (searchType === 'artist') {
                 await handleArtistSearch(searchQuery);
             } else {
@@ -113,7 +113,7 @@ const SearchComponent = () => {
         setSearchQuery('');
         setResults([]);
         setError(null);
-        
+
         // Pulisci sessionStorage quando cambi tipo di ricerca
         sessionStorage.removeItem('lastSearchResults');
         sessionStorage.removeItem('lastSearchQuery');
@@ -173,22 +173,24 @@ const SearchComponent = () => {
                             e.target.src = 'https://placehold.co/300x300?text=No+Image';
                         }}
                     />
-                    <div className="card-body">
+                    <div className="card-body d-flex flex-column">
                         <h5 className="card-title">{vinyl.title}</h5>
                         <p className="card-text">{vinyl.artist}</p>
-                        <Link
-                            to={`/vinyl/${vinyl.master_id}?type=master`}
-                            className="btn btn-primary w-100"
-                            onClick={() => {
-                                console.log('Navigating to album:', {
-                                    title: vinyl.title,
-                                    id: vinyl.master_id,
-                                    type: 'master'
-                                });
-                            }}
-                        >
-                            Vedi Album
-                        </Link>
+                        <div className="mt-auto text-center">
+                            <Link
+                                to={`/vinyl/${vinyl.master_id}?type=master`}
+                                className="btn btn-primary w-100"
+                                onClick={() => {
+                                    console.log('Navigating to album:', {
+                                        title: vinyl.title,
+                                        id: vinyl.master_id,
+                                        type: 'master'
+                                    });
+                                }}
+                            >
+                                Vedi Album
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -197,7 +199,7 @@ const SearchComponent = () => {
 
     return (
         <div className="container py-5">
-            <h1 className="mb-4">Cerca Vinili</h1>
+            <h1 className="mb-4">Cerca Artisti o Vinili</h1>
 
             <form onSubmit={handleSearch} className="mb-5">
                 <div className="row g-3">
@@ -245,21 +247,19 @@ const SearchComponent = () => {
                     {error}
                 </div>
             )}
-            <div className="row g-4">
-                {isLoading ? (
-                    <div className="col-12 d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
-                        <SpinnerComponent />
-                    </div>
-                ) : Array.isArray(results) && results.length > 0 ? (
-                    renderResults()
-                ) : (
-                    <div className="col-12 text-center">
-                        <p className="text-muted">
-                            {searchQuery ? 'Nessun risultato trovato' : 'Inizia la tua ricerca'}
-                        </p>
-                    </div>
-                )}
-            </div>
+            {isLoading ? (
+                <SpinnerComponent />
+            ) : Array.isArray(results) && results.length > 0 ? (
+                <div className="row g-4">
+                    {renderResults()}
+                </div>
+            ) : (
+                <div className="col-12 text-center">
+                    <p className="text-muted">
+                        {searchQuery ? 'Nessun risultato trovato' : 'Inizia la tua ricerca'}
+                    </p>
+                </div>
+            )}
         </div >
     );
 };

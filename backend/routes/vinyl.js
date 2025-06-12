@@ -2,14 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Vinyl = require('../models/Vinyl');
 const Comment = require('../models/Comment');
-const DiscogsService = require('../services/discogs.service');
-const { google } = require('googleapis');
-const youtube = google.youtube({
-  version: 'v3',
-  auth: process.env.YOUTUBE_API_KEY
-});
-const NodeCache = require('node-cache');
-const previewCache = new NodeCache({ stdTTL: 86400 });
 
 // GET - Search by artist
 router.get('/search/artist', async (req, res) => {
@@ -164,6 +156,35 @@ router.get('/home-random', async (req, res) => {
   }
 });
 
+// GET - Lista generi disponibili
+router.get('/genres', async (req, res) => {
+  try {
+    // Define a static list of genres or fetch from your database
+    const genres = [
+      'Rock',
+      'Jazz',
+      'Hip Hop',
+      'Electronic',
+      'Classical',
+      'Pop',
+      'Blues',
+      'R&B',
+      'Soul',
+      'Funk',
+      'Country',
+      'Reggae',
+      'Metal',
+      'Folk',
+      'Latin'
+    ];
+
+    res.json({ genres });
+  } catch (error) {
+    console.error('Error fetching genres:', error);
+    res.status(500).json({ message: 'Error fetching genres' });
+  }
+});
+
 // GET - Vinili per genere
 router.get('/genre-search', async (req, res) => {
   try {
@@ -224,91 +245,6 @@ router.get('/genre-search', async (req, res) => {
   }
 });
 
-// GET - Lista generi disponibili
-router.get('/genres', async (req, res) => {
-  try {
-    // Define a static list of genres or fetch from your database
-    const genres = [
-      'Rock',
-      'Jazz',
-      'Hip Hop',
-      'Electronic',
-      'Classical',
-      'Pop',
-      'Blues',
-      'R&B',
-      'Soul',
-      'Funk',
-      'Country',
-      'Reggae',
-      'Metal',
-      'Folk',
-      'Latin'
-    ];
-
-    res.json({ genres });
-  } catch (error) {
-    console.error('Error fetching genres:', error);
-    res.status(500).json({ message: 'Error fetching genres' });
-  }
-});
-
-// Rotte dettaglio vinile
-
-// GET - Dettaglio vinile
-router.get('/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { type } = req.query;
-
-        // Determine the correct API endpoint
-        let discogsUrl;
-        if (type === 'master') {
-            discogsUrl = `https://api.discogs.com/masters/${id}`;
-        } else {
-            discogsUrl = `https://api.discogs.com/releases/${id}`;
-        }
-
-        console.log('Fetching from Discogs URL:', discogsUrl); // Debug log
-
-        const response = await fetch(discogsUrl, {
-            headers: {
-                'Authorization': `Discogs token=${process.env.DISCOGS_TOKEN}`,
-                'User-Agent': 'VinylVerse/1.0'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Discogs API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Discogs API response:', data); // Debug log
-
-        res.json(data);
-    } catch (error) {
-        console.error('Error in vinyl route:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-
-// GET - Media voti per un vinile
-router.get('/:id/rating', async (req, res) => {
-  try {
-    const comments = await Comment.find({ vinyl: req.params.id });
-    const averageRating = comments.reduce((acc, comment) => acc + comment.rating, 0) / comments.length;
-
-    res.json({
-      averageRating: averageRating || 0,
-      totalRatings: comments.length
-    });
-  } catch (error) {
-    console.error('Rating error:', error);
-    res.status(500).json({ message: error.message });
-  }
-});
-
 // GET - Dettagli artista
 router.get('/artist/:id', async (req, res) => {
     try {
@@ -363,6 +299,66 @@ router.get('/artist/:id', async (req, res) => {
     } catch (error) {
         console.error('Errore nel recupero dettagli artista:', error);
         res.status(500).json({ error: 'Errore nel recupero dettagli artista' });
+    }
+});
+
+// Rotte dettaglio vinile
+
+// GET - Media voti per un vinile
+router.get('/:id/rating', async (req, res) => {
+  try {
+    const comments = await Comment.find({ vinyl: req.params.id });
+    const averageRating = comments.reduce((acc, comment) => acc + comment.rating, 0) / comments.length;
+
+    res.json({
+      averageRating: averageRating || 0,
+      totalRatings: comments.length
+    });
+  } catch (error) {
+    console.error('Rating error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET - Dettaglio vinile
+router.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { type } = req.query;
+
+        let discogsUrl = type === 'master' 
+            ? `https://api.discogs.com/masters/${id}`
+            : `https://api.discogs.com/releases/${id}`;
+
+        const response = await fetch(discogsUrl, {
+            headers: {
+                'Authorization': `Discogs token=${process.env.DISCOGS_TOKEN}`,
+                'User-Agent': 'VinylVerse/1.0'
+            }
+        });
+
+        if (!response.ok) throw new Error('Discogs API error');
+        const data = await response.json();
+
+        // Aggiungi preview_url alle tracce usando i video disponibili
+        const tracklist = data.tracklist.map(track => {
+            const video = data.videos?.find(v => 
+                v.title.toLowerCase().includes(track.title.toLowerCase())
+            );
+            return {
+                ...track,
+                preview_url: video?.uri || null
+            };
+        });
+
+        res.json({
+            ...data,
+            tracklist
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Error fetching vinyl details' });
     }
 });
 
