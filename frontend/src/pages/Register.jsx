@@ -1,55 +1,159 @@
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
 const Register = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Le password non coincidono');
+      return;
+    }
+
+    if (!validatePassword(formData.password)) {
+      setError('La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero e un carattere speciale');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Errore durante la registrazione');
+      }
+
+      // Login automatico dopo la registrazione
+      await login({
+        email: formData.email,
+        password: formData.password
+      });
+
+      navigate('/');
+
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="text-center mb-4">Register</h2>
-              <form>
+        <div className="col-12 col-md-6 col-lg-4">
+          <div className="card shadow">
+            <div className="card-body p-4">
+              <h2 className="text-center mb-4">Registrati</h2>
+              <form onSubmit={handleSubmit}>
+                {error && <div className="alert alert-danger">{error}</div>}
+
                 <div className="mb-3">
                   <label htmlFor="username" className="form-label">Username</label>
                   <input
                     type="text"
-                    className="form-control"
                     id="username"
-                    placeholder="Choose a username"
+                    className="form-control"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    required
                   />
                 </div>
+
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">Email address</label>
+                  <label htmlFor="email" className="form-label">Email</label>
                   <input
                     type="email"
-                    className="form-control"
                     id="email"
-                    placeholder="name@example.com"
+                    className="form-control"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
                   />
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="password" className="form-label">Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                    placeholder="Create a password"
-                  />
+                  <div className="input-group">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      className="form-control"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      <i className={`bi bi-eye${showPassword ? '-slash' : ''}`}></i>
+                    </button>
+                  </div>
+                  <small className="form-text text-muted">
+                    La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero e un carattere speciale
+                  </small>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="confirmPassword"
-                    placeholder="Confirm your password"
-                  />
+
+                <div className="mb-4">
+                  <label htmlFor="confirmPassword" className="form-label">Conferma Password</label>
+                  <div className="input-group">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      id="confirmPassword"
+                      className="form-control"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      <i className={`bi bi-eye${showConfirmPassword ? '-slash' : ''}`}></i>
+                    </button>
+                  </div>
                 </div>
-                <div className="d-grid">
-                  <button type="submit" className="btn btn-primary">
-                    Register
-                  </button>
-                </div>
-                <div className="text-center mt-3">
-                  <p>Already have an account? <a href="/login">Login here</a></p>
+
+                <button type="submit" className="btn btn-primary w-100 mb-3">
+                  Registrati
+                </button>
+
+                <div className="text-center">
+                  <p className="mb-0">Hai già un account?</p>
+                  <Link to="/login" className="text-primary text-decoration-none">
+                    Accedi qui
+                  </Link>
                 </div>
               </form>
             </div>

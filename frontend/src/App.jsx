@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Layout from './components/layout/LayoutComponent';
 import Home from './pages/Home';
 import Browse from './pages/Browse';
@@ -12,6 +13,7 @@ import VinylDetailComponent from './components/vinyl/VinylDetailComponent';
 import SearchComponent from './components/search/SearchComponent';
 import ArtistProfileComponent from './components/layout/ArtistProfileComponent';
 import { CartProvider } from './context/CartContext';
+import UserProfileComponent from './components/layout/UserProfileComponent';
 
 function App() {
   return (
@@ -30,6 +32,7 @@ function App() {
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/profile" element={<UserProfileComponent />} />
               </Routes>
             </Layout>
           </Router>

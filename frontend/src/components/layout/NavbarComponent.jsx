@@ -7,15 +7,15 @@ const Navbar = () => {
   const { isAuthenticated, user } = useAuth();
   const { cartItems } = useCart();
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
         <Link className="navbar-brand" to="/">VinylVerse</Link>
-        <button 
-          className="navbar-toggler" 
-          type="button" 
-          data-bs-toggle="collapse" 
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
         >
           <span className="navbar-toggler-icon"></span>
@@ -35,18 +35,33 @@ const Navbar = () => {
               </Link>
             </li>
           </ul>
-          
+
           <ul className="navbar-nav ms-auto">
             {isAuthenticated ? (
               <>
-                <li className="nav-item">
-                  <span className="nav-link">
+                <li className="nav-item dropdown">
+                  <a
+                    className="nav-link dropdown-toggle"
+                    href="#"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
                     <i className="bi bi-person-circle me-2"></i>
-                    {user?.username || 'Utente'}
-                  </span>
-                </li>
-                <li className="nav-item">
-                  <LogoutButton />
+                    {user?.username || 'Profilo'}
+                  </a>
+                  <ul className="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <Link to="/profile" className="dropdown-item">
+                        <i className="bi bi-person me-2"></i>
+                        Il mio profilo
+                      </Link>
+                    </li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <LogoutButton />
+                    </li>
+                  </ul>
                 </li>
               </>
             ) : (

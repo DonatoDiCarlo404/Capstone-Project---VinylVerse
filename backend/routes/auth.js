@@ -4,25 +4,25 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
-const auth = require('../middleware/auth'); 
+const auth = require('../middleware/auth');
 
 // Registrazione
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Controlla se l'utente esiste già
-    const userExists = await User.findOne({ 
-      $or: [{ email }, { username }] 
+    // Verifica se l'utente esiste già
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }]
     });
-    
-    if (userExists) {
-      return res.status(400).json({ 
-        message: 'Email o username già in uso' 
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: 'Username o email già in uso'
       });
     }
 
-    // Hash della password
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Crea nuovo utente
@@ -33,9 +33,32 @@ router.post('/register', async (req, res) => {
     });
 
     await user.save();
-    res.status(201).json({ message: 'Registrazione completata' });
+
+    // Genera token
+    const token = jwt.sign(
+      {
+        id: user._id.toString(),
+        username: user.username
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(201).json({
+      message: 'Utente registrato con successo',
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: 'Errore durante la registrazione',
+      error: error.message
+    });
   }
 });
 
@@ -58,10 +81,10 @@ router.post('/login', async (req, res) => {
 
     // Genera JWT token
     const token = jwt.sign(
-      { 
+      {
         id: user._id.toString(),
         username: user.username
-      }, 
+      },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -72,7 +95,7 @@ router.post('/login', async (req, res) => {
       username: user.username
     });
 
-    res.json({ 
+    res.json({
       token,
       user: {
         id: user._id,
@@ -88,47 +111,70 @@ router.post('/login', async (req, res) => {
 // Profilo utente (protetto)
 router.get('/profile', auth, async (req, res) => {
   try {
-    // Qui implementeremo la protezione con middleware
-    const user = await User.findById(req.user.userId)
+    const user = await User.findById(req.user.id)
       .select('-password')
-      .populate('orderHistory.items.vinyl');
-    
+      .populate({
+        path: 'orderHistory',
+        populate: {
+          path: 'items.vinyl',
+          select: 'title artist imageUrl'
+        }
+      });
+
     if (!user) {
       return res.status(404).json({ message: 'Utente non trovato' });
     }
 
-    res.json(user);
+    const reviews = await Comment.find({ user: req.user.id });
+    
+    const populatedReviews = await Promise.all(reviews.map(async (review) => {
+      try {
+        const vinylResponse = await fetch(`http://localhost:3001/api/vinyl/${review.vinyl}`);
+        if (!vinylResponse.ok) {
+          throw new Error('Vinyl data not found');
+        }
+        
+        const vinylData = await vinylResponse.json();
+        console.log('Vinyl data fetched:', vinylData); // Debug log
+        
+        return {
+          id: review._id,
+          vinylTitle: vinylData.title || 'Vinile non disponibile',
+          vinylArtist: vinylData.artists?.[0]?.name || vinylData.artist || 'Artista non disponibile', // Check both paths
+          text: review.text,
+          rating: review.rating,
+          createdAt: review.createdAt
+        };
+      } catch (error) {
+        console.error('Error fetching vinyl data:', error);
+        return {
+          id: review._id,
+          vinylTitle: 'Vinile non disponibile',
+          vinylArtist: 'Artista non disponibile',
+          text: review.text,
+          rating: review.rating,
+          createdAt: review.createdAt
+        };
+      }
+    }));
+
+    // Debug log
+    console.log('Populated reviews:', populatedReviews);
+
+    res.json({
+      profile: {
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt,
+        orderHistory: user.orderHistory || []
+      },
+      reviews: populatedReviews
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Profile error:', error);
+    res.status(500).json({ message: 'Errore del server' });
   }
-});
-
-// GET - Recensioni utente
-router.get('/profile/reviews', auth, async (req, res) => {
-    try {
-        const userReviews = await Comment.find({ user: req.user.userId })
-            .populate('vinyl', 'title artist coverImage')
-            .populate('user', 'username')
-            .sort({ createdAt: -1 });
-
-        const formattedReviews = userReviews.map(review => ({
-            id: review._id,
-            vinylTitle: review.vinyl.title,
-            vinylArtist: review.vinyl.artist,
-            vinylCover: review.vinyl.coverImage,
-            rating: review.rating,
-            comment: review.text,
-            createdAt: review.createdAt
-        }));
-
-        res.json({
-            count: formattedReviews.length,
-            reviews: formattedReviews
-        });
-    } catch (error) {
-        console.error('Get user reviews error:', error);
-        res.status(500).json({ message: error.message });
-    }
 });
 
 module.exports = router;
