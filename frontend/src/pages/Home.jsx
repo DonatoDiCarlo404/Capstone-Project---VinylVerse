@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Carousel } from 'react-bootstrap';
 import { useLoading } from '../context/LoadingContext';
 
 const Home = () => {
@@ -28,6 +29,12 @@ const Home = () => {
     fetchRandomVinyls();
   }, []);
 
+  // Dividi gli album in gruppi di 4 per il carosello
+  const vinylGroups = [];
+  for (let i = 0; i < randomVinyls.length; i += 4) {
+    vinylGroups.push(randomVinyls.slice(i, i + 4));
+  }
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -38,6 +45,7 @@ const Home = () => {
 
   return (
     <div className="container py-4">
+      {/* Hero Section - Invariata */}
       <div className="px-4 py-5 my-5 text-center">
         <h1 className="display-4 fw-bold">Benvenuti in VinylVerse</h1>
         <div className="col-lg-6 mx-auto">
@@ -53,43 +61,51 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Sezione Carosello Nuovi Vinili */}
       <div className="container py-5">
         <h2 className="text-center mb-4">Scopri Nuovi Vinili</h2>
-        <div className="row g-4">
-          {randomVinyls.map((vinyl) => (
-            <div key={vinyl.id} className="col-md-3">
-              <div className="card h-100">
-                <img
-                  src={vinyl.cover_image}
-                  className="card-img-top"
-                  alt={vinyl.title}
-                  style={{ height: '300px', objectFit: 'cover' }}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = 'https://placehold.co/300x300?text=No+Image';
-                  }}
-                />
-                <div className="card-body">
-                  <h5 className="card-title">{vinyl.title}</h5>
-                  <p className="card-text">{vinyl.artist}</p>
-                  <p className="card-text">
-                    <small className="text-muted">
-                      {vinyl.year} - {vinyl.genre?.join(', ')}
-                    </small>
-                  </p>
-                  <Link 
-                    to={`/vinyl/${vinyl.id}`}
-                    className="btn btn-primary"
-                  >
-                    Vedi Album
-                  </Link>
-                </div>
+        <Carousel interval={5000} className="vinyl-carousel">
+          {vinylGroups.map((group, index) => (
+            <Carousel.Item key={index}>
+              <div className="row g-4">
+                {group.map((vinyl) => (
+                  <div key={vinyl.id} className="col-md-3">
+                    <div className="card h-100">
+                      <img
+                        src={vinyl.cover_image}
+                        className="card-img-top"
+                        alt={vinyl.title}
+                        style={{ height: '300px', objectFit: 'cover' }}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://placehold.co/300x300?text=No+Image';
+                        }}
+                      />
+                      <div className="card-body">
+                        <h5 className="card-title">{vinyl.title}</h5>
+                        <p className="card-text">{vinyl.artist}</p>
+                        <p className="card-text">
+                          <small className="text-muted">
+                            {vinyl.year} - {vinyl.genre?.join(', ')}
+                          </small>
+                        </p>
+                        <Link 
+                          to={`/vinyl/${vinyl.id}`}
+                          className="btn btn-primary"
+                        >
+                          Vedi Album
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            </Carousel.Item>
           ))}
-        </div>
+        </Carousel>
       </div>
 
+      {/* Sezione Generi - Invariata */}
       <div className="row mt-5">
         <h2 className="text-center mb-4">Generi più amati</h2>
         {['Rock', 'Jazz', 'Hip Hop', 'Electronic'].map((genre) => (

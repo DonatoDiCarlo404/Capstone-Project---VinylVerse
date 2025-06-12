@@ -130,7 +130,7 @@ router.get('/home-random', async (req, res) => {
     const searchParams = new URLSearchParams({
       type: 'release',
       format: 'vinyl',
-      per_page: '20',
+      per_page: '50',    // Aumentato per avere più scelta
       sort: 'want',
       sort_order: 'desc'
     });
@@ -150,7 +150,7 @@ router.get('/home-random', async (req, res) => {
 
     const randomResults = [...data.results]
       .sort(() => Math.random() - 0.5)
-      .slice(0, 4);
+      .slice(0, 12);    // Prendiamo 12 album invece di 4
 
     res.json({
       discogs: {

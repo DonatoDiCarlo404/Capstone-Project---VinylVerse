@@ -83,10 +83,15 @@ const VinylDetailComponent = () => {
     fetchData();
   }, [id]);
 
-  const handlePreview = (preview) => {
-    setCurrentPreview(preview);
-    setShowPlayer(true);
-  };
+  const handlePreview = (track) => {
+        if (!track.preview_url) {
+            setError('Anteprima non disponibile per questa traccia');
+            return;
+        }
+
+        setCurrentPreview(track);
+        setShowPlayer(true);
+    };
 
   const handleAddComment = async (e) => {
     e.preventDefault();

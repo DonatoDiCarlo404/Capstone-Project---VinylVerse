@@ -278,3 +278,36 @@
   transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+/* Carousel Styles */
+
+.vinyl-carousel {
+    margin-bottom: 60px;
+}
+
+.vinyl-carousel .carousel-control-prev,
+.vinyl-carousel .carousel-control-next {
+    width: 5%;
+    background: none;  
+    border-radius: 5px;
+    opacity: 0.8;
+}
+
+.vinyl-carousel .carousel-control-prev:hover,
+.vinyl-carousel .carousel-control-next:hover {
+    opacity: 1;
+}
+
+.vinyl-carousel .carousel-control-prev-icon,
+.vinyl-carousel .carousel-control-next-icon {
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.3)); 
+}
+
+.vinyl-carousel .carousel-indicators {
+    bottom: -50px;
+}
+
+.vinyl-carousel .carousel-indicators button {
+    background-color: #666;
+}
