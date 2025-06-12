@@ -261,28 +261,14 @@ const VinylDetailComponent = () => {
   return (
     <>
       <div className="container py-5">
-        <button
-          className="btn btn-secondary mb-4"
-          onClick={() => {
-            // Se veniamo dalla pagina artista, usa navigate(-1)
-            const fromArtist = document.referrer.includes('/artist/');
-            if (fromArtist) {
-              navigate(-1);
-            } else {
-              // Altrimenti mantieni il comportamento esistente per la ricerca
-              if (vinyl) {
-                localStorage.setItem('lastSearchResults', JSON.stringify({
-                  type: 'album',
-                  query: vinyl.title
-                }));
-              }
-              navigate('/search');
-            }
-          }}
-        >
-          <i className="bi bi-arrow-left me-2"></i>
-          Indietro
-        </button>
+              <button 
+        className="btn btn-secondary mb-4"
+        onClick={() => navigate(-1)}
+      >
+        <i className="bi bi-arrow-left me-2"></i>
+        Indietro
+      </button>
+
 
         <div className="row">
           <div className="col-md-4">

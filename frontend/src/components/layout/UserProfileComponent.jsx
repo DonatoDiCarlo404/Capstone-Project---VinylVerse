@@ -49,6 +49,13 @@ const UserProfileComponent = () => {
 
     return(
         <div className="container py-5">
+            <button 
+                className="btn btn-secondary mb-4"
+                onClick={() => navigate(-1)}
+            >
+                <i className="bi bi-arrow-left me-2"></i>
+                Indietro
+            </button>
             <div className="row">
                 <div className="col-12">
                     <h2>Il Mio Profilo</h2>

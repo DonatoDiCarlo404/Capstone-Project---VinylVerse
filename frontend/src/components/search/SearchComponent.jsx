@@ -11,24 +11,16 @@ const SearchComponent = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-    // Mantieni i risultati della ricerca precedente
-    const lastResults = localStorage.getItem('lastSearchResults');
-    if (lastResults) {
-        const savedData = JSON.parse(lastResults);
-        setSearchQuery(savedData.query);
+        const lastResults = sessionStorage.getItem('lastSearchResults');
+        const lastQuery = sessionStorage.getItem('lastSearchQuery');
+        const lastType = sessionStorage.getItem('lastSearchType');
 
-        if (savedData.type === 'album') {
-            setSearchType('title');
-            handleAlbumSearch(savedData.query);
-        } else if (savedData.artist) {
-            setSearchType('artist');
-            setResults([savedData.artist]);
+        if (lastResults && lastQuery && lastType) {
+            setResults(JSON.parse(lastResults));
+            setSearchQuery(lastQuery);
+            setSearchType(lastType);
         }
-
-        // Pulizia risultati precedenti
-        localStorage.removeItem('lastSearchResults');
-    }
-}, []);
+    }, []);
 
     const handleArtistSearch = async (query) => {
         try {
@@ -41,14 +33,20 @@ const SearchComponent = () => {
             if (!response.ok) throw new Error('Errore nella ricerca');
 
             const data = await response.json();
-            setResults(data.discogs.results || []);
+            const results = data.discogs.results || [];
+            setResults(results);
 
-            if (data.discogs.results.length === 0) {
+            // Salva i risultati della ricerca artista
+            sessionStorage.setItem('lastSearchResults', JSON.stringify(results));
+            sessionStorage.setItem('lastSearchQuery', query);
+            sessionStorage.setItem('lastSearchType', 'artist');
+
+            if (results.length === 0) {
                 setError('Nessun artista trovato');
             }
         } catch (error) {
-            console.error('Artist search error:', error);
-            setError('Si è verificato un errore durante la ricerca dell\'artista');
+            console.error('Errore ricerca artista:', error);
+            setError('Errore durante la ricerca dell\'artista');
         }
     };
 
@@ -57,16 +55,13 @@ const SearchComponent = () => {
             const params = new URLSearchParams({
                 query: query,
                 page: 1,
-                type: 'release' // Changed from 'master' to 'release'
+                type: 'release'
             });
 
             const response = await fetch(`http://localhost:3001/api/vinyl/search/album?${params}`);
             if (!response.ok) throw new Error('Errore nella ricerca');
 
             const data = await response.json();
-            console.log('Raw album search results:', data); // Debug log
-
-            // Filter and process results
             const processedResults = (data.discogs.results || [])
                 .filter(album => album.type === 'master' || album.type === 'release')
                 .map(album => ({
@@ -77,15 +72,19 @@ const SearchComponent = () => {
                     artist: album.artist
                 }));
 
-            console.log('Processed album results:', processedResults); // Debug log
             setResults(processedResults);
+
+            // Salva i risultati della ricerca album
+            sessionStorage.setItem('lastSearchResults', JSON.stringify(processedResults));
+            sessionStorage.setItem('lastSearchQuery', query);
+            sessionStorage.setItem('lastSearchType', 'title');
 
             if (processedResults.length === 0) {
                 setError('Nessun album trovato');
             }
         } catch (error) {
-            console.error('Album search error:', error);
-            setError('Si è verificato un errore durante la ricerca dell\'album');
+            console.error('Errore ricerca album:', error);
+            setError('Errore durante la ricerca dell\'album');
         }
     };
 
@@ -93,7 +92,6 @@ const SearchComponent = () => {
         e.preventDefault();
         setIsLoading(true);
         setError(null);
-        setResults([]);
 
         try {
             if (searchType === 'artist') {
@@ -101,16 +99,25 @@ const SearchComponent = () => {
             } else {
                 await handleAlbumSearch(searchQuery);
             }
+        } catch (error) {
+            console.error('Errore nella ricerca:', error);
+            setError('Si è verificato un errore durante la ricerca');
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleTypeChange = (e) => {
-        setSearchType(e.target.value);
-        setSearchQuery('');  // Pulisci la query
-        setResults([]);      // Pulisci i risultati
-        setError(null);      // Resetta gli errori
+        const newType = e.target.value;
+        setSearchType(newType);
+        setSearchQuery('');
+        setResults([]);
+        setError(null);
+        
+        // Pulisci sessionStorage quando cambi tipo di ricerca
+        sessionStorage.removeItem('lastSearchResults');
+        sessionStorage.removeItem('lastSearchQuery');
+        sessionStorage.removeItem('lastSearchType');
     };
 
     const handleQueryChange = (e) => {
