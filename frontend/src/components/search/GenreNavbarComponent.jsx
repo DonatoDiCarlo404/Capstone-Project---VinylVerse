@@ -9,7 +9,7 @@ const GenreNavbarComponent = () => {
     useEffect(() => {
         const fetchGenres = async () => {
             try {
-                const response = await fetch('http://localhost:3001/api/vinyl/genres');
+                const response = await fetch('https://vinylverse-backend.onrender.com/api/vinyl/genres');
                 if (!response.ok) throw new Error('Errore nel caricamento dei generi');
                 const data = await response.json();
                 setGenres(data.genres || []);

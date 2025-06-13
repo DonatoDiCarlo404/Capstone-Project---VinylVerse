@@ -24,7 +24,7 @@ const UserProfileComponent = () => {
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:3001/api/auth/profile', {
+                const response = await fetch('https://vinylverse-backend.onrender.com/api/auth/profile', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'

@@ -36,7 +36,7 @@ const Cart = () => {
         localStorage.setItem('orders', JSON.stringify(orders));
 
         // Invia email di conferma
-        fetch('http://localhost:3001/api/orders/send-confirmation', {
+        fetch('https://vinylverse-backend.onrender.com/api/orders/send-confirmation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

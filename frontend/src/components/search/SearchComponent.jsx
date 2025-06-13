@@ -29,7 +29,7 @@ const SearchComponent = () => {
                 page: 1
             });
 
-            const response = await fetch(`http://localhost:3001/api/vinyl/search/artist?${params}`);
+            const response = await fetch(`https://vinylverse-backend.onrender.com/api/vinyl/search/artist?${params}`);
             if (!response.ok) throw new Error('Errore nella ricerca');
 
             const data = await response.json();
@@ -58,7 +58,7 @@ const SearchComponent = () => {
                 type: 'release'
             });
 
-            const response = await fetch(`http://localhost:3001/api/vinyl/search/album?${params}`);
+            const response = await fetch(`https://vinylverse-backend.onrender.com/api/vinyl/search/album?${params}`);
             if (!response.ok) throw new Error('Errore nella ricerca');
 
             const data = await response.json();

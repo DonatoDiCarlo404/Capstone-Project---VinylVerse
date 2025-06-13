@@ -37,7 +37,7 @@ const Browse = () => {
   const fetchVinyls = async () => {
     try {
       setLoading(true);
-      const baseUrl = 'http://localhost:3001/api/vinyl';
+      const baseUrl = 'https://vinylverse-backend.onrender.com/api/vinyl';
       
       // Usa rotte diverse per home e generi
       const endpoint = fromPopularGenres 

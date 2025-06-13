@@ -32,7 +32,7 @@ const VinylDetailComponent = () => {
         const type = searchParams.get('type') || 'release';
 
         const vinylResponse = await fetch(
-          `http://localhost:3001/api/vinyl/${id}?type=${type}`,
+          `https://vinylverse-backend.onrender.com/api/vinyl/${id}?type=${type}`,
           {
             headers: {
               'Accept': 'application/json'
@@ -59,7 +59,7 @@ const VinylDetailComponent = () => {
         setVinyl(transformedData);
 
         try {
-          const commentsResponse = await fetch(`http://localhost:3001/api/comments/${id}`);
+          const commentsResponse = await fetch(`https://vinylverse-backend.onrender.com/api/comments/${id}`);
           if (commentsResponse.ok) {
             const commentsData = await commentsResponse.json();
             setComments(commentsData);
@@ -110,7 +110,7 @@ const VinylDetailComponent = () => {
       };
       console.log('Dati commento:', commentData);
 
-      const response = await fetch('http://localhost:3001/api/comments', {
+      const response = await fetch('https://vinylverse-backend.onrender.com/api/comments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ const VinylDetailComponent = () => {
     try {
       console.log('Modifica commento:', { commentId, newText, newRating }); // Debug
 
-      const response = await fetch(`http://localhost:3001/api/comments/${commentId}`, {
+      const response = await fetch(`https://vinylverse-backend.onrender.com/api/comments/${commentId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ const VinylDetailComponent = () => {
     if (!window.confirm('Sei sicuro di voler eliminare questo commento?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/comments/${commentId}`, {
+      const response = await fetch(`https://vinylverse-backend.onrender.com/api/comments/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

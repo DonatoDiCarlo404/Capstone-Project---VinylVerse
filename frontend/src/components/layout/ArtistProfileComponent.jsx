@@ -15,7 +15,7 @@ const ArtistProfileComponent = () => {
     const fetchArtistDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:3001/api/vinyl/artist/${id}`);
+        const response = await fetch(`https://vinylverse-backend.onrender.com/api/vinyl/artist/${id}`);
         if (!response.ok) throw new Error('Artist not found');
         const data = await response.json();
 

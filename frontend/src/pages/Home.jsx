@@ -12,7 +12,7 @@ const Home = () => {
     const fetchRandomVinyls = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3001/api/vinyl/home-random');
+        const response = await fetch('https://vinylverse-backend.onrender.com/api/vinyl/home-random');
 
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
