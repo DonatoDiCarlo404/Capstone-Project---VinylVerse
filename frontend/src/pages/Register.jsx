@@ -14,6 +14,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { setIsAuthenticated } = useAuth();
 
   const validatePassword = (password) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -21,38 +22,38 @@ const Register = () => {
   };
 
  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-        // Log per debug
-        console.log('Invio richiesta di registrazione...');
-        
-        const response = await fetch('https://vinylverse-backend.onrender.com/api/auth/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-                username, 
-                email, 
-                password 
-            })
-        });
+        e.preventDefault();
+        try {
+            console.log('Invio richiesta di registrazione...');
 
-        console.log('Status risposta:', response.status);
-        console.log('URL richiesta:', response.url);
+            const userData = {
+                username: e.target.username.value,
+                email: e.target.email.value,
+                password: e.target.password.value
+            };
 
-        const data = await response.json();
-        console.log('Dati risposta:', data);
+            const response = await fetch('https://vinylverse-backend.onrender.com/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData)
+            });
 
-        if (response.ok) {
-            alert('Registrazione completata!');
-            navigate('/login');
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Semplifica per ora - redirect al login
+                alert('Registrazione completata! Effettua il login.');
+                navigate('/login');
+            } else {
+                setError(data.message || 'Errore durante la registrazione');
+            }
+        } catch (error) {
+            console.error('Errore dettagliato:', error);
+            setError('Errore di connessione al server');
         }
-    } catch (error) {
-        console.error('Errore dettagliato:', error);
-        setError('Errore di connessione al server');
-    }
-};
+    };
 
   return (
     <div className="container py-5">
