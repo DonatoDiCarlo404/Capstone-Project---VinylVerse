@@ -14,6 +14,7 @@ import SearchComponent from './components/search/SearchComponent';
 import ArtistProfileComponent from './components/layout/ArtistProfileComponent';
 import { CartProvider } from './context/CartContext';
 import UserProfileComponent from './components/layout/UserProfileComponent';
+import Error from './pages/Error';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/profile" element={<UserProfileComponent />} />
+                <Route path="*" element={<Error />} />
               </Routes>
             </Layout>
           </Router>
