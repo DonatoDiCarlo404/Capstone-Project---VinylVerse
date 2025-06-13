@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import SpinnerComponent from '../layout/SpinnerComponent';
 
 const UserProfileComponent = () => {
     const { user } = useAuth();
@@ -9,6 +10,21 @@ const UserProfileComponent = () => {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [orderCount, setOrderCount] = useState(0);
+    const [orderHistory, setOrderHistory] = useState([]);
+    const [orders, setOrders] = useState([]);
+
+    useEffect(() => {
+        // Carica gli ordini usando la nuova chiave semplificata
+        const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        setOrders(savedOrders);
+    }, []);
+
+    useEffect(() => {
+        // Leggi il conteggio degli ordini dal localStorage
+        const orders = parseInt(localStorage.getItem('userOrders') || '0');
+        setOrderCount(orders);
+    }, []);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -41,15 +57,21 @@ const UserProfileComponent = () => {
 
         fetchUserData();
     }, [user?.id]);
-    
+
+    useEffect(() => {
+        // Carica la cronologia ordini dal localStorage
+        const savedOrders = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+        setOrderHistory(savedOrders);
+    }, []);
+
     console.log('Reviews:', userData?.reviews);
 
-    if (loading) return <div>Caricamento...</div>;
+    if (loading) return <div> <SpinnerComponent /> </div>;
     if (error) return <div className="alert alert-danger">{error}</div>;
 
-    return(
+    return (
         <div className="container py-5">
-            <button 
+            <button
                 className="btn btn-secondary mb-4"
                 onClick={() => navigate(-1)}
             >
@@ -78,7 +100,7 @@ const UserProfileComponent = () => {
                                             </div>
                                             <div className="border-start border-2"></div>
                                             <div>
-                                                <h3 className="mb-0">{userData.profile?.orderHistory?.length || 0}</h3>
+                                                <h3 className="mb-0">{orderCount}</h3>
                                                 <small className="text-muted">Ordini</small>
                                             </div>
                                         </div>
@@ -86,26 +108,37 @@ const UserProfileComponent = () => {
                                 </div>
                             </div>
 
-                            {/* Resto del codice invariato per ordini e recensioni */}
+                            {/* Codice per ordini e recensioni */}
                             <div className="col-md-8">
                                 <div className="card mb-4">
                                     <div className="card-body">
                                         <div className="d-flex justify-content-between align-items-center mb-3">
                                             <h5 className="card-title mb-0">Dischi Acquistati</h5>
                                             <span className="badge bg-primary">
-                                                {userData.profile?.orderHistory?.length || 0} ordini
+                                                {orderCount} ordini
                                             </span>
                                         </div>
-                                        {userData.profile?.orderHistory?.length > 0 ? (
-                                            <ul className="list-unstyled">
-                                                {userData.profile.orderHistory.map(order => (
-                                                    <li key={order._id} className="mb-2">
-                                                        {order.items?.map(item => item.vinyl?.title).join(', ')}
-                                                    </li>
+                                        {orders.length > 0 ? (
+                                            <div className="list-group">
+                                                {orders.map((order) => (
+                                                    <div key={order.orderId} className="list-group-item">
+                                                        <h6>Data: {new Date(order.date).toLocaleDateString()}</h6>
+                                                        {order.items.map((item, index) => (
+                                                            <div key={index} className="d-flex align-items-center mb-2">
+                                                                <div>
+                                                                    <div>{item.title}</div>
+                                                                    <small>{item.artist} - Quantità: {item.quantity}</small>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        <div className="text-end">
+                                                            <strong>Totale: €{order.total}</strong>
+                                                        </div>
+                                                    </div>
                                                 ))}
-                                            </ul>
+                                            </div>
                                         ) : (
-                                            <p>Nessun disco acquistato</p>
+                                            <p>Nessun ordine effettuato</p>
                                         )}
                                     </div>
                                 </div>

@@ -334,3 +334,7 @@
     width: fit-content;
     margin: 0 auto;
 }
+
+.bi-facebook, .bi-whatsapp, .bi-instagram, .bi-threads {
+  cursor: pointer;
+}

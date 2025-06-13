@@ -58,7 +58,7 @@ const Navbar = () => {
                       </Link>
                     </li>
                     <li><hr className="dropdown-divider" /></li>
-                    <li>
+                    <li className='text-center'>
                       <LogoutButton />
                     </li>
                   </ul>

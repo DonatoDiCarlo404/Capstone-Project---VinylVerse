@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Carousel } from 'react-bootstrap';
-import { useLoading } from '../context/LoadingContext';
+import SpinnerComponent from '../components/layout/SpinnerComponent';
 
 const Home = () => {
   const [randomVinyls, setRandomVinyls] = useState([]);
@@ -36,7 +36,7 @@ const Home = () => {
   }
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div> <SpinnerComponent /> Enter VinylVerse...</div>;
   }
 
   if (error) {
@@ -56,6 +56,7 @@ const Home = () => {
           <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
             <Link to="/search" className="btn btn-primary btn-lg px-4 gap-3">
               Sfoglia la Collezione
+              <i className="bi bi-search ms-2"></i>
             </Link>
           </div>
         </div>
@@ -120,8 +121,8 @@ const Home = () => {
                 <div className="card-body d-flex flex-column align-items-center justify-content-center">
                   <h3 className="card-title mb-3">{genre}</h3>
                   <small className="text-white">
-                    Esplora {genre.toLowerCase()}
-                    <i className="bi bi-arrow-right-circle ms-2"></i>
+                    Esplora
+                    <i class="bi bi-music-note-beamed ms-2"></i>
                   </small>
                 </div>
               </div>

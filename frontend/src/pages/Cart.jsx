@@ -5,12 +5,40 @@ const Cart = () => {
   const { cartItems, total, removeFromCart, updateQuantity, clearCart } = useCart();
   const navigate = useNavigate();
 
+  const calculateTotal = () => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
   // Gestione del checkout
   const handleCheckout = () => {
-    alert('Acquisto completato con successo, Grazie! Il team di VinylVerse.');
-    clearCart();
-    navigate('/');
-  };
+    try {
+        const orderDetails = {
+            orderId: `ORD-${Date.now()}`,
+            date: new Date().toISOString(),
+            items: cartItems.map(item => ({
+                title: item.title,
+                artist: item.artist,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            total: calculateTotal()
+        };
+
+        // Salva i dettagli degli ordini
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        orders.push(orderDetails);
+        localStorage.setItem('orders', JSON.stringify(orders));
+
+        // Aggiorna il conteggio basandosi sulla lunghezza effettiva degli ordini
+        localStorage.setItem('userOrders', orders.length.toString());
+
+        alert('Ordine completato con successo!');
+        clearCart();
+        navigate('/profile');
+    } catch (error) {
+        console.error('Errore durante il checkout:', error);
+    }
+};
 
   // Gestione rimozione con conferma
   const handleRemove = (id) => {
