@@ -20,28 +20,36 @@ const Register = () => {
     return regex.test(password);
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        const response = await fetch('https://vinylverse-backend.onrender.com/api/auth/login', {
+        // Log per debug
+        console.log('Invio richiesta di registrazione...');
+        
+        const response = await fetch('https://vinylverse-backend.onrender.com/api/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, email, password }),
+            body: JSON.stringify({ 
+                username, 
+                email, 
+                password 
+            })
         });
 
+        console.log('Status risposta:', response.status);
+        console.log('URL richiesta:', response.url);
+
         const data = await response.json();
+        console.log('Dati risposta:', data);
 
         if (response.ok) {
-            // Aggiungi alert per notifica email
-            alert('Registrazione completata! Controlla la tua email per la conferma.');
-            // Redirect al login
+            alert('Registrazione completata!');
             navigate('/login');
-        } else {
-            setError(data.message || 'Errore durante la registrazione');
         }
     } catch (error) {
+        console.error('Errore dettagliato:', error);
         setError('Errore di connessione al server');
     }
 };
