@@ -22,49 +22,29 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Le password non coincidono');
-      return;
-    }
-
-    if (!validatePassword(formData.password)) {
-      setError('La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero e un carattere speciale');
-      return;
-    }
-
     try {
-      const response = await fetch('http://localhost:3001/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password
-        }),
-      });
+        const response = await fetch('http://localhost:3001/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, email, password }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Errore durante la registrazione');
-      }
-
-      // Login automatico dopo la registrazione
-      await login({
-        email: formData.email,
-        password: formData.password
-      });
-
-      navigate('/');
-
+        if (response.ok) {
+            // Aggiungi alert per notifica email
+            alert('Registrazione completata! Controlla la tua email per la conferma.');
+            // Redirect al login
+            navigate('/login');
+        } else {
+            setError(data.message || 'Errore durante la registrazione');
+        }
     } catch (error) {
-      setError(error.message);
+        setError('Errore di connessione al server');
     }
-  };
+};
 
   return (
     <div className="container py-5">

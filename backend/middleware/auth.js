@@ -9,9 +9,13 @@ const auth = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    console.log('Token decodificato:', decoded); // Debug log
+
     req.user = {
       id: decoded.id, // Mi aspetto che il token contenga un campo id
-      username: decoded.username
+      username: decoded.username,
+      email: decoded.email
     };
     next();
   } catch (error) {

@@ -14,17 +14,6 @@ const UserProfileComponent = () => {
     const [orderHistory, setOrderHistory] = useState([]);
     const [orders, setOrders] = useState([]);
 
-    useEffect(() => {
-        // Carica gli ordini usando la nuova chiave semplificata
-        const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-        setOrders(savedOrders);
-    }, []);
-
-    useEffect(() => {
-        // Leggi il conteggio degli ordini dal localStorage
-        const orders = parseInt(localStorage.getItem('userOrders') || '0');
-        setOrderCount(orders);
-    }, []);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -58,10 +47,23 @@ const UserProfileComponent = () => {
         fetchUserData();
     }, [user?.id]);
 
+    // useEffect per gestire gli ordini dell'utente corrente
     useEffect(() => {
-        // Carica la cronologia ordini dal localStorage
-        const savedOrders = JSON.parse(localStorage.getItem('orderHistory') || '[]');
-        setOrderHistory(savedOrders);
+        try {
+            const token = localStorage.getItem('token');
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            const currentUserId = decodedToken.id;
+
+            const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const userOrders = allOrders.filter(order => order.userId === currentUserId);
+            
+            setOrders(userOrders);
+            setOrderCount(userOrders.length);
+        } catch (error) {
+            console.error('Errore nel caricamento ordini:', error);
+            setOrders([]);
+            setOrderCount(0);
+        }
     }, []);
 
     console.log('Reviews:', userData?.reviews);

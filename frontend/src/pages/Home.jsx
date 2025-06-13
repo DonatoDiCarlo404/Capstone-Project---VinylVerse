@@ -122,7 +122,7 @@ const Home = () => {
                   <h3 className="card-title mb-3">{genre}</h3>
                   <small className="text-white">
                     Esplora
-                    <i class="bi bi-music-note-beamed ms-2"></i>
+                    <i className="bi bi-music-note-beamed ms-2"></i>
                   </small>
                 </div>
               </div>

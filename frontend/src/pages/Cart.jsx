@@ -12,8 +12,14 @@ const Cart = () => {
   // Gestione del checkout
   const handleCheckout = () => {
     try {
+        // Decodifica token per ottenere userId
+        const token = localStorage.getItem('token');
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+
+        // Crea orderDetails con userId
         const orderDetails = {
             orderId: `ORD-${Date.now()}`,
+            userId: decodedToken.id,
             date: new Date().toISOString(),
             items: cartItems.map(item => ({
                 title: item.title,
@@ -24,15 +30,22 @@ const Cart = () => {
             total: calculateTotal()
         };
 
-        // Salva i dettagli degli ordini
+        // Salva ordine nel localStorage
         const orders = JSON.parse(localStorage.getItem('orders') || '[]');
         orders.push(orderDetails);
         localStorage.setItem('orders', JSON.stringify(orders));
 
-        // Aggiorna il conteggio basandosi sulla lunghezza effettiva degli ordini
-        localStorage.setItem('userOrders', orders.length.toString());
+        // Invia email di conferma
+        fetch('http://localhost:3001/api/orders/send-confirmation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ orderDetails })
+        });
 
-        alert('Ordine completato con successo!');
+        alert('Ordine completato con successo! Controlla la tua email per la conferma. Grazie, il team di VinylVerse!');
         clearCart();
         navigate('/profile');
     } catch (error) {

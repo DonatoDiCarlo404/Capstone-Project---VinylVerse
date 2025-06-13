@@ -3,6 +3,7 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const auth = require('../middleware/auth');
+const { sendOrderConfirmationEmail } = require('../configs/Mail');
 
 // POST - Crea ordine dal carrello
 router.post('/checkout', auth, async (req, res) => {
@@ -76,6 +77,36 @@ router.get('/:orderId', auth, async (req, res) => {
         res.json(order);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+});
+
+// Route per la conferma ordine ed invio email
+router.post('/send-confirmation', auth, async (req, res) => {
+    try {
+        const { orderDetails } = req.body;
+        console.log('Tentativo invio email...');
+        console.log('User data:', req.user);
+        console.log('Order details:', orderDetails);
+
+        // Verifica email utente
+        if (!req.user.email) {
+            console.error('Email utente mancante nei dati');
+            return res.status(400).json({ error: 'Email utente mancante' });
+        }
+
+        // Tentativo invio email
+        console.log('Invio email a:', req.user.email);
+        await sendOrderConfirmationEmail(
+            req.user.email,
+            req.user.username,
+            orderDetails
+        );
+        console.log('Email inviata con successo!');
+
+        res.json({ message: 'Email di conferma inviata' });
+    } catch (error) {
+        console.error('Errore dettagliato invio email:', error.response?.body || error);
+        res.status(500).json({ error: 'Errore invio email' });
     }
 });
 

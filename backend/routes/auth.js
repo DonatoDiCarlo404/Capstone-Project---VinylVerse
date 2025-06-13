@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
 const auth = require('../middleware/auth');
+const { sendRegistrationEmail } = require('../configs/Mail');
 
 // Registrazione
 router.post('/register', async (req, res) => {
@@ -44,8 +45,12 @@ router.post('/register', async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    // Invia email di benvenuto
+    await sendRegistrationEmail(user.email, user.username);
+
+
     res.status(201).json({
-      message: 'Utente registrato con successo',
+      message: 'Utente registrato con successo! Controlla la tua email per la conferma.',
       token,
       user: {
         id: user._id,
@@ -54,6 +59,7 @@ router.post('/register', async (req, res) => {
       }
     });
 
+    
   } catch (error) {
     res.status(500).json({
       message: 'Errore durante la registrazione',
@@ -83,7 +89,8 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       {
         id: user._id.toString(),
-        username: user.username
+        username: user.username,
+        email: user.email
       },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
