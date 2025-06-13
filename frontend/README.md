@@ -10,3 +10,26 @@ Currently, two official plugins are available:
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+# VinylVerse
+
+E-commerce platform for vinyl records built with React and Node.js.
+
+## Live Demo
+- Frontend: https://capstone-project-vinyl-verse.vercel.app/
+- Backend: https://vinylverse-backend.onrender.com
+
+## Tech Stack
+- Frontend: React + Vite
+- Backend: Node.js + Express
+- Database: MongoDB
+- Authentication: JWT
+- Email: SendGrid
+- Deploy: Vercel (frontend) + Render (backend)
+
+## Features
+- User authentication
+- Product catalog
+- Shopping cart
+- Order management
+- Email notifications
