@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { ThemeContext } from '../../modules/context';
 
 const LoginFormComponent = ({ onSuccess }) => {
   const { login } = useAuth();
@@ -11,6 +12,7 @@ const LoginFormComponent = ({ onSuccess }) => {
   });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [theme, setTheme] = useContext(ThemeContext);
 
 
   const handleSubmit = async (e) => {
@@ -60,13 +62,22 @@ const LoginFormComponent = ({ onSuccess }) => {
 
     return (
     <div className="login-container">
-      <div className="login-card">
-        <h2 className="login-title">Accedi</h2>
+      <div className={`login-card ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
+        <h2 className={`login-title ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>Accedi</h2>
         <form onSubmit={handleSubmit} className="login-form">
           {error && <div className="alert alert-danger">{error}</div>}
 
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email" className={`${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>Email</label>
             <input
               type="email"
               id="email"
@@ -78,7 +89,10 @@ const LoginFormComponent = ({ onSuccess }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password" className={`${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>Password</label>
             <div className="input-group">
               <input
                 type={showPassword ? "text" : "password"}
@@ -98,12 +112,12 @@ const LoginFormComponent = ({ onSuccess }) => {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary w-100">
+          <button type="submit" className="btn btn-success w-100">
             Accedi
           </button>
           <div className="text-center mt-3">
             <p className="mb-0">Non hai un account?</p>
-            <Link to="/register" className="text-primary link-opacity-50-hover link-offset-2">
+            <Link to="/register" className="text-success link-opacity-50-hover link-offset-2">
               Registrati qui
             </Link>
           </div>

@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
 import { useCart } from '../context/CartContext';
+import { ThemeContext } from '../modules/context';
 
 const Cart = () => {
   const { cartItems, total, removeFromCart, updateQuantity, clearCart } = useCart();
   const navigate = useNavigate();
+  const [theme, setTheme] = useContext(ThemeContext);
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -74,18 +77,27 @@ const Cart = () => {
 
   return (
     <div className="container py-4">
-      <h2 className="mb-4">Il tuo Carrello</h2>
+      <h2 className="mb-4 text-success">Il tuo Carrello</h2>
 
       {cartItems.length === 0 ? (
-        <div className="empty-cart-container">
+        <div className={`empty-cart-container ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
           <i className="bi bi-vinyl empty-cart-icon"></i>
-          <h3 className="empty-cart-title">Il tuo carrello è vuoto</h3>
-          <p className="empty-cart-text">
+          <h3 className={`empty-cart-title ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>Il tuo carrello è vuoto</h3>
+          <p className={`empty-cart-text ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
             Non hai ancora aggiunto nessun vinile al carrello.<br />
             Esplora il nostro catalogo e trova i tuoi album preferiti!
           </p>
           <button
-            className="btn btn-primary empty-cart-button"
+            className="btn btn-success empty-cart-button"
             onClick={() => navigate('/search')}
           >
             <i className="bi bi-search me-2"></i>
@@ -98,7 +110,10 @@ const Cart = () => {
             <div className="col-lg-8">
               {cartItems.map(item => (
                 <div key={item.id} className="card mb-4 cart-item">
-                  <div className="card-body">
+                  <div className={`card-body ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
                     <div className="row align-items-center">
                       <div className="col-md-2">
                         <img
@@ -148,7 +163,10 @@ const Cart = () => {
 
             <div className="col-lg-4">
               <div className="card checkout-card sticky-top" style={{ top: '2rem' }}>
-                <div className="card-body">
+                <div className={`card-body ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
                   <h5 className="card-title mb-4">Riepilogo Ordine</h5>
 
                   <div className="d-flex justify-content-between mb-3">

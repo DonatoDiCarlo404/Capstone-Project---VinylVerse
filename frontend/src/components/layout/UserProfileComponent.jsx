@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SpinnerComponent from '../layout/SpinnerComponent';
+import { ThemeContext } from '../../modules/context';
 
 const UserProfileComponent = () => {
     const { user } = useAuth();
@@ -13,6 +14,7 @@ const UserProfileComponent = () => {
     const [orderCount, setOrderCount] = useState(0);
     const [orderHistory, setOrderHistory] = useState([]);
     const [orders, setOrders] = useState([]);
+    const [theme, setTheme] = useContext(ThemeContext);
 
 
     useEffect(() => {
@@ -56,7 +58,7 @@ const UserProfileComponent = () => {
 
             const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
             const userOrders = allOrders.filter(order => order.userId === currentUserId);
-            
+
             setOrders(userOrders);
             setOrderCount(userOrders.length);
         } catch (error) {
@@ -82,11 +84,13 @@ const UserProfileComponent = () => {
             </button>
             <div className="row">
                 <div className="col-12">
-                    <h2>Il Mio Profilo</h2>
+                    <h2 className='text-success'>Il Mio Profilo</h2>
                     {userData && (
                         <div className="row">
                             <div className="col-md-4">
-                                <div className="card mb-4">
+                                <div className={`card mb-4 ${theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+                                    }`}
+                                    data-bs-theme={theme}>
                                     <div className="card-body">
                                         <h5 className="card-title mb-4">Informazioni Utente</h5>
                                         <p><strong>Username:</strong> {userData?.profile?.username}</p>
@@ -112,11 +116,13 @@ const UserProfileComponent = () => {
 
                             {/* Codice per ordini e recensioni */}
                             <div className="col-md-8">
-                                <div className="card mb-4">
+                                <div className={`card mb-4 ${theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+                                    }`}
+                                    data-bs-theme={theme}>
                                     <div className="card-body">
                                         <div className="d-flex justify-content-between align-items-center mb-3">
                                             <h5 className="card-title mb-0">Dischi Acquistati</h5>
-                                            <span className="badge bg-primary">
+                                            <span className="badge bg-success">
                                                 {orderCount} ordini
                                             </span>
                                         </div>
@@ -147,10 +153,13 @@ const UserProfileComponent = () => {
 
                                 {/* Sezione Recensioni invariata */}
                                 <div className="card">
-                                    <div className="card-body">
+                                    <div className={`card-body ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
                                         <div className="d-flex justify-content-between align-items-center mb-3">
                                             <h5 className="card-title mb-0">Recensioni</h5>
-                                            <span className="badge bg-primary">
+                                            <span className="badge bg-success">
                                                 {userData.reviews?.length || 0} recensioni
                                             </span>
                                         </div>
@@ -160,8 +169,8 @@ const UserProfileComponent = () => {
                                                 {userData.reviews.map(review => (
                                                     <li key={review.id} className="list-group-item">
                                                         {/* Contenuto recensione invariato */}
-                                                        <div className="border-start border-4 border-primary ps-3">
-                                                            <h6 className="mb-1 text-primary">{review.vinylTitle}</h6>
+                                                        <div className="border-start border-4 border-success ps-3">
+                                                            <h6 className="mb-1 text-success">{review.vinylTitle}</h6>
                                                             <p className="mb-1 small text-muted">di {review.vinylArtist}</p>
                                                             <p className="mb-2">{review.text}</p>
                                                             <div className="d-flex justify-content-between align-items-center">

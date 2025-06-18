@@ -15,32 +15,40 @@ import ArtistProfileComponent from './components/layout/ArtistProfileComponent';
 import { CartProvider } from './context/CartContext';
 import UserProfileComponent from './components/layout/UserProfileComponent';
 import Error from './pages/Error';
+import { ThemeContext } from './modules/context';
+import { useState } from 'react';
 
 function App() {
+  const [theme, setTheme] = useState('light');
+
   return (
-    <LoadingProvider>
-      <AuthProvider>
-        <CartProvider>
-          <Router>
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/search" element={<SearchComponent />} />
-                <Route path="/browse" element={<Browse />} />
-                <Route path="/browse/:genre" element={<Browse />} />
-                <Route path="/artist/:id" element={<ArtistProfileComponent />} />
-                <Route path="/vinyl/:id" element={<VinylDetailComponent />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/profile" element={<UserProfileComponent />} />
-                <Route path="*" element={<Error />} />
-              </Routes>
-            </Layout>
-          </Router>
-        </CartProvider>
-      </AuthProvider>
-    </LoadingProvider>
+    <ThemeContext.Provider value={[theme, setTheme]}>
+      <div className={`app-container ${theme === 'dark' ? 'theme-dark' : 'theme-light'}`}>
+        <LoadingProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Router>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/search" element={<SearchComponent />} />
+                    <Route path="/browse" element={<Browse />} />
+                    <Route path="/browse/:genre" element={<Browse />} />
+                    <Route path="/artist/:id" element={<ArtistProfileComponent />} />
+                    <Route path="/vinyl/:id" element={<VinylDetailComponent />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/profile" element={<UserProfileComponent />} />
+                    <Route path="*" element={<Error />} />
+                  </Routes>
+                </Layout>
+              </Router>
+            </CartProvider>
+          </AuthProvider>
+        </LoadingProvider>
+      </div>
+    </ThemeContext.Provider>
   );
 }
 

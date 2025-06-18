@@ -1,15 +1,22 @@
 import { Link } from 'react-router-dom';
+import { useContext } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import LogoutButton from '../auth/LogoutButtonComponent';
+import { ThemeContext } from '../../modules/context';
+import Button from 'react-bootstrap/Button';
 
 const Navbar = () => {
   const { isAuthenticated, user } = useAuth();
   const { cartItems } = useCart();
+  const [theme, setTheme] = useContext(ThemeContext);
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className={`navbar navbar-expand-lg ${
+                theme === 'dark' ? 'navbar-dark bg-dark' : 'navbar-light bg-light'
+            }`}
+            data-bs-theme={theme}>
       <div className="container">
         <Link className="navbar-brand" to="/">VinylVerse</Link>
         <button
@@ -23,7 +30,7 @@ const Navbar = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
-              <Link className="nav-link position-relative" to="/cart">
+              <Link className={`nav-link position-relative ${theme === 'dark' ? 'text-light' : 'text-dark'}`} to="/cart">
                 Carrello
                 <i className="bi bi-cart3 ms-2"></i>
                 {itemCount > 0 && (
@@ -33,6 +40,11 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
+              <Button variant="secondary" className="ms-2" onClick={() => {
+                theme === 'light' ? setTheme('dark') : setTheme('light');
+              }}>
+                <i className="bi bi-sunset me-2"></i>
+                Tema</Button>
             </li>
           </ul>
 
@@ -66,7 +78,7 @@ const Navbar = () => {
               </>
             ) : (
               <li className="nav-item">
-                <Link to="/login" className="nav-link">
+                <Link to="/login" className={`nav-link ${theme === 'dark' ? 'text-light' : 'text-dark'}`}>
                   <i className="bi bi-box-arrow-in-right me-2"></i>
                   Login
                 </Link>

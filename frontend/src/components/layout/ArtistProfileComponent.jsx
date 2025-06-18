@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import SpinnerComponent from './SpinnerComponent';
+import { ThemeContext } from '../../modules/context';
 
 const ArtistProfileComponent = () => {
   const { id } = useParams();
@@ -10,6 +11,7 @@ const ArtistProfileComponent = () => {
   const [releases, setReleases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [theme, setTheme] = useContext(ThemeContext);
 
   useEffect(() => {
     const fetchArtistDetails = async () => {
@@ -100,15 +102,21 @@ const ArtistProfileComponent = () => {
           />
         </div>
         <div className="col-md-8">
-          <h1>{artist?.name}</h1>
-          <p className="text-muted">{artist?.profile}</p>
+          <h1 className='text-success'>{artist?.name}</h1>
+          <p className={`${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>{artist?.profile}</p>
         </div>
       </div>
 
-      <h2 className="mt-5 mb-4">Discografia</h2>
-      <div className="table-responsive">
+      <h2 className="mt-5 mb-4 text-success">Discografia</h2>
+      <div className={`table-responsive ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
         <table className="table table-hover">
-          <thead className="table-light">
+          <thead>
             <tr>
               <th>Anno</th>
               <th>Titolo</th>
@@ -127,7 +135,7 @@ const ArtistProfileComponent = () => {
                 <td>
                   <Link
                     to={`/vinyl/${release.master_id}?type=release`}
-                    className="btn btn-sm btn-primary"
+                    className="btn btn-sm btn-success"
                     onClick={() => {
                       setLoading(true);
                       console.log('Navigating to release:', {

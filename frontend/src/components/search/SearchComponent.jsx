@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { useLoading } from '../../context/LoadingContext';
 import SpinnerComponent from '../layout/SpinnerComponent';
+import { ThemeContext } from '../../modules/context';
 
 const SearchComponent = () => {
     const [searchType, setSearchType] = useState('artist');
@@ -9,6 +10,7 @@ const SearchComponent = () => {
     const [results, setResults] = useState([]);
     const { isLoading, setIsLoading } = useLoading();
     const [error, setError] = useState(null);
+    const [theme, setTheme] = useContext(ThemeContext);
 
     useEffect(() => {
         const lastResults = sessionStorage.getItem('lastSearchResults');
@@ -146,11 +148,13 @@ const SearchComponent = () => {
                                 e.target.src = 'https://placehold.co/300x300?text=No+Image';
                             }}
                         />
-                        <div className="card-body text-center">
+                        <div className={`card-body text-center ${theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+                            }`}
+                            data-bs-theme={theme}>
                             <h3 className="card-title mb-4">{artist.name}</h3>
                             <Link
                                 to={`/artist/${artist.id}`}
-                                className="btn btn-primary btn-lg w-75"
+                                className="btn btn-success btn-lg w-75"
                             >
                                 Vedi Profilo Artista
                             </Link>
@@ -173,13 +177,15 @@ const SearchComponent = () => {
                             e.target.src = 'https://placehold.co/300x300?text=No+Image';
                         }}
                     />
-                    <div className="card-body d-flex flex-column">
+                    <div className={`card-body d-flex flex-column ${theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+                        }`}
+                        data-bs-theme={theme}>
                         <h5 className="card-title">{vinyl.title}</h5>
                         <p className="card-text">{vinyl.artist}</p>
                         <div className="mt-auto text-center">
                             <Link
                                 to={`/vinyl/${vinyl.master_id}?type=master`}
-                                className="btn btn-primary w-100"
+                                className="btn btn-success w-100"
                                 onClick={() => {
                                     console.log('Navigating to album:', {
                                         title: vinyl.title,
@@ -199,7 +205,7 @@ const SearchComponent = () => {
 
     return (
         <div className="container py-5">
-            <h1 className="mb-4">Cerca Artisti o Vinili</h1>
+            <h1 className="mb-4 text-success">Cerca Artisti o Vinili</h1>
 
             <form onSubmit={handleSearch} className="mb-5">
                 <div className="row g-3">
@@ -233,7 +239,7 @@ const SearchComponent = () => {
                         <button
                             type="submit"
                             id="searchButton"
-                            className="btn btn-primary btn-lg w-100"
+                            className="btn btn-success btn-lg w-100"
                             disabled={!searchQuery.trim()}
                         >
                             Cerca
@@ -255,7 +261,7 @@ const SearchComponent = () => {
                 </div>
             ) : (
                 <div className="col-12 text-center">
-                    <p className="text-muted">
+                    <p className="text-success">
                         {searchQuery ? 'Nessun risultato trovato' : 'Inizia la tua ricerca'}
                     </p>
                 </div>

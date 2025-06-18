@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import SpinnerComponent from '../components/layout/SpinnerComponent';
+import { ThemeContext } from '../modules/context';
 
 const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,6 +12,7 @@ const Browse = () => {
   const [pagination, setPagination] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useContext(ThemeContext);
 
   const ITEMS_PER_PAGE = fromPopularGenres ? 10 : 4;
   const genres = [
@@ -83,9 +85,12 @@ const Browse = () => {
   return (
     <div className="container py-5">
       {fromPopularGenres && (
-        <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <nav className={`navbar navbar-axpand-lb mb-4 ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
           <div className="container">
-            <span className="navbar-brand">Trova i vinili esplorando i generi disponibili</span>
+            <span className="navbar-brand">Trova vinili esplorando tra i generi disponibili</span>
             <div className="ms-auto">
               <select
                 className="form-select"
@@ -101,7 +106,7 @@ const Browse = () => {
         </nav>
       )}
 
-      <h2 className="mb-4 text-capitalize">
+      <h2 className="mb-4 text-capitalize text-center text-success">
         I 50 Vinili {genre} più popolari
       </h2>
 
@@ -119,7 +124,10 @@ const Browse = () => {
                   e.target.src = 'https://placehold.co/300x300?text=No+Image';
                 }}
               />
-              <div className="card-body d-flex flex-column">
+              <div className={`card-body d-flex flex-column ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
                 <h5 className="card-title">{vinyl.title}</h5>
                 <p className="card-text">{vinyl.artist}</p>
                 <div className="d-flex justify-content-between align-items-center mb-2">
@@ -140,7 +148,7 @@ const Browse = () => {
                 <div className="mt-auto text-center">
                 <Link
                   to={`/vinyl/${vinyl.id}`}
-                  className="btn btn-primary w-100"
+                  className="btn btn-success w-100"
                 >
                   Vedi Album
                 </Link>
@@ -152,8 +160,11 @@ const Browse = () => {
       </div>
 
       {pagination && pagination.pages > 1 && (
-        <div className="d-flex justify-content-center mt-5">
-          <nav aria-label="Page navigation">
+        <div className={`d-flex justify-content-center mt-5 ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
+          <nav aria-label="Page navigation" className="mt-3">
             <ul className="pagination">
               <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
                 <button

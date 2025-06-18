@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ThemeContext } from '../modules/context';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { setIsAuthenticated } = useAuth();
+  const [theme, setTheme] = useContext(ThemeContext);
 
   const validatePassword = (password) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -59,7 +61,10 @@ const Register = () => {
     <div className="container py-5">
       <div className="row justify-content-center">
         <div className="col-12 col-md-6 col-lg-4">
-          <div className="card shadow">
+          <div className={`card shadow ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
             <div className="card-body p-4">
               <h2 className="text-center mb-4">Registrati</h2>
               <form onSubmit={handleSubmit}>
@@ -134,13 +139,13 @@ const Register = () => {
                   </div>
                 </div>
 
-                <button type="submit" className="btn btn-primary w-100 mb-3">
+                <button type="submit" className="btn btn-success w-100 mb-3">
                   Registrati
                 </button>
 
                 <div className="text-center">
                   <p className="mb-0">Hai già un account?</p>
-                  <Link to="/login" className="text-primary text-decoration-none">
+                  <Link to="/login" className="text-success text-decoration-none">
                     Accedi qui
                   </Link>
                 </div>

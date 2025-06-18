@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Modal } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import SpinnerComponent from '../layout/SpinnerComponent';
+import { ThemeContext } from '../../modules/context';
 
 const VinylDetailComponent = () => {
   const { id } = useParams();
@@ -23,6 +24,7 @@ const VinylDetailComponent = () => {
   const { addToCart } = useCart();
   const [addedToCart, setAddedToCart] = useState(false);
   const [cartFeedback, setCartFeedback] = useState({ visible: false, message: '' });
+  const [theme, setTheme] = useContext(ThemeContext);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -280,11 +282,14 @@ const VinylDetailComponent = () => {
 
 
         <div className="row">
-          <div className="col-md-4">
+          <div className={`col-md-4 ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
             <img
               src={vinyl.images?.[0]?.uri}
               alt={vinyl.title}
-              className="img-fluid rounded shadow"
+              className="img-fluid rounded shadow mt-2"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = '/vinyl-placeholder.jpg';
@@ -318,7 +323,10 @@ const VinylDetailComponent = () => {
                 </div>
               )}
               <div className="price-section mb-3">
-                <h3 className="text-dark mt-3">
+                <h3 className={`mt-3 ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
                   €{calculateBasePrice()}
                 </h3>
                 {vinyl.format?.toLowerCase().includes('limited') && (
@@ -331,7 +339,10 @@ const VinylDetailComponent = () => {
             </div>
           </div>
 
-          <div className="col-md-8">
+          <div className={`col-md-8 ${
+                theme === 'dark' ? 'bg-dark text-light' : 'bg-light text-dark'
+            }`}
+            data-bs-theme={theme}>
             <h2 className="mb-3">{vinyl.title}</h2>
             <h4 className="text-muted mb-4">{vinyl.artist}</h4>
 
@@ -405,7 +416,7 @@ const VinylDetailComponent = () => {
                       required
                     />
                   </div>
-                  <button type="submit" className="btn btn-primary">
+                  <button type="submit" className="btn btn-success">
                     Pubblica Commento
                   </button>
                 </form>
